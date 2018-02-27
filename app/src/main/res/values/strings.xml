@@ -1,3 +1,30 @@
 <resources>
-    <string name="app_name">MyApplication1</string>
+    <string name="app_name">E-Farming</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="sign_up">Sign up</string>
+    <string name="log_session">Email : </string>
+    <string name="forgot_your_password">Forgot your password ?</string>
+    <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
+    <string name="dnt_have_sign_up">Don\'t have a account ? Sign up</string>
+    <string name="alrdy_have_ac">Already have a account ? Sign in</string>
+    <string name="denied_title">Unable to get %s </string>
+    <string name="denied_msg">You have denied the permission for getting %s access.. Please go to app appSettings and allow permission</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="go_to_appsettings">go to AppSettings</string>
+    <string name="choose_one">Choose one</string>
+    <string name="storage_permission_required">Storage permission required for this app</string>
+    <string name="go_to_settings_enable_permission">Go to settings and enable permissions</string>
+    <string name="storage">Storage</string>
+    <string name="camera">Camera</string>
 </resources>

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "952040450751",
+    "firebase_url": "https://e-farming-3b0d4.firebaseio.com",
+    "project_id": "e-farming-3b0d4",
+    "storage_bucket": "e-farming-3b0d4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:952040450751:android:0f5dcb0fb960c529",
+        "android_client_info": {
+          "package_name": "com.ko.efarming"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "952040450751-tskad7ht7u1v8uj3r2masuj3b3eofo2r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ko.efarming",
+            "certificate_hash": "a94df96727af12640d1919b9ac4b997d3da3fb45"
+          }
+        },
+        {
+          "client_id": "952040450751-llfm41618t26moa63sp6pspn2bfjisb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbJEKceFFTRERDCe7-eiRQnbQxVMoUEpQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "952040450751-llfm41618t26moa63sp6pspn2bfjisb1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
