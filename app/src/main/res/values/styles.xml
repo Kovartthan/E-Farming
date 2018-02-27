@@ -18,4 +18,9 @@
     <style name="Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="colorAccent">@color/colorPrimary</item>
     </style>
+
+    <style name="TransparentProgressDialog" parent="android:Theme.Holo.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>
