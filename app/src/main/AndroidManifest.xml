@@ -16,6 +16,7 @@
         <activity android:name=".base.BaseActivity" />
         <activity
             android:name=".login.LoginActivity"
+            android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -30,6 +31,7 @@
         </activity>
         <activity
             android:name=".login.SignUpActivity"
+            android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".home.HomeActivity"  android:screenOrientation="portrait"/>

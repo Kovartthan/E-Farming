@@ -12,12 +12,13 @@
 
     <ScrollView
         android:id="@+id/login_form"
+        android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:scrollbars="none">
 
         <RelativeLayout
-            android:layout_gravity="center"
+
             android:padding="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
