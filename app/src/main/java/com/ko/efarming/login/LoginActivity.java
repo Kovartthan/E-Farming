@@ -148,6 +148,13 @@ public class LoginActivity extends BaseActivity {
                 return false;
             }
         });
+
+        findViewById(R.id.txt_frgt_pass).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(LoginActivity.this,ForgotActivity.class));
+            }
+        });
     }
 
     private void attemptLogin() {

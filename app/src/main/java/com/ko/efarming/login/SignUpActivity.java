@@ -232,6 +232,15 @@ public class SignUpActivity extends BaseActivity {
                 return false;
             }
         });
+
+        findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+
     }
 
     private void promptMediaOption() {
