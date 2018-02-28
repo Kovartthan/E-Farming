@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    android:padding="16dp"
     tools:context="com.ko.efarming.login.LoginActivity">
 
     <include layout="@layout/common_layout_clear_focus" />
@@ -17,6 +16,7 @@
 
         <RelativeLayout
             android:layout_gravity="center"
+            android:padding="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -124,9 +124,9 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="420dp"
                 android:padding="10dp"
+                android:textSize="15sp"
                 android:text="Don't have a account ? Sign up"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
+                android:textColor="@android:color/white" />
 
 
         </RelativeLayout>

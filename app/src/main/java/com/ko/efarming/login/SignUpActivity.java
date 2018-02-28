@@ -9,13 +9,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -25,7 +25,7 @@ import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.UnderlineSpan;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -37,11 +37,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.storage.OnPausedListener;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.model.User;
@@ -75,6 +81,8 @@ public class SignUpActivity extends BaseActivity {
     private TextInputLayout emailLayout;
     private TextInputLayout passwordLayout;
     private Button mEmailSignInButton;
+    private   String imagerls = "";
+    private String imagePathForFireBase = "";
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -82,6 +90,7 @@ public class SignUpActivity extends BaseActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_PICTURE_FROM_GALLERY) {
                 imagPaths = getPaths(this, data, true);
+                imagePathForFireBase = imagPaths[0];
                 File file = new File(imagPaths[0]);
                 if (file.exists()) {
                     startCrop(file.getAbsolutePath());
@@ -91,9 +100,11 @@ public class SignUpActivity extends BaseActivity {
                 File f = TempManager.getTempPictureFile(this);
                 if (f != null) {
                     String path = f.getAbsolutePath();
+                    imagePathForFireBase = path;
 
                     CompressImage compressImage = new CompressImage(this);
                     path = compressImage.compressImage(path);
+
 
                     imagPaths = new String[]{path};
                     File file = new File(imagPaths[0]);
@@ -132,7 +143,7 @@ public class SignUpActivity extends BaseActivity {
     }
 
     private void setupSpannableForSignIn() {
-        SpannableString signUpString = new SpannableString(getString(R.string.dnt_have_sign_up));
+        SpannableString signUpString = new SpannableString(getString(R.string.already_have_an_account_sign_in));
 
         final ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
@@ -146,18 +157,16 @@ public class SignUpActivity extends BaseActivity {
                 super.updateDrawState(ds);
                 super.updateDrawState(ds);
                 ds.setUnderlineText(false);
-                ds.setColor(getResources().getColor(android.R.color.holo_green_dark));
             }
         };
 
-        signUpString.setSpan(new UnderlineSpan(), 0, 24, 0);
+//        signUpString.setSpan(new UnderlineSpan(), 0, 24, 0);
         signUpString.setSpan(clickableSpan, 24, signUpString.length(), 0);
-        signUpString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(SignUpActivity.this,android.R.color.white)), 24, signUpString.length(),  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        signUpString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(SignUpActivity.this, android.R.color.holo_green_dark)), 24, signUpString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         txtSignUp.setText(signUpString, TextView.BufferType.SPANNABLE);
         txtSignUp.setMovementMethod(LinkMovementMethod.getInstance());
     }
-
 
 
     private void setupEvent() {
@@ -213,6 +222,14 @@ public class SignUpActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 attemptSignup();
+            }
+        });
+
+        mPasswordView.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                attemptSignup();
+                return false;
             }
         });
     }
@@ -355,7 +372,7 @@ public class SignUpActivity extends BaseActivity {
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     checkAndRequestCameraPermissions();
                                 }
-                            },false);
+                            }, false);
                         } else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(this);
                             builder.setTitle(getResources().getString(R.string.go_to_settings_enable_permission));
@@ -391,7 +408,7 @@ public class SignUpActivity extends BaseActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 checkAndRequestCameraPermissions();
                             }
-                        },false);
+                        }, false);
                     }
                 }
         }
@@ -450,21 +467,73 @@ public class SignUpActivity extends BaseActivity {
     }
 
     private void doSignUp() {
+        if (efProgressDialog != null)
+            efProgressDialog.show();
         getApp().getFireBaseAuth().createUserWithEmailAndPassword(mEmailView.getText().toString(), mPasswordView.getText().toString())
                 .addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (!task.isSuccessful()) {
+                            if (efProgressDialog.isShowing())
+                                efProgressDialog.dismiss();
                             Toast.makeText(SignUpActivity.this, "Authentication failed." + task.getException(),
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(SignUpActivity.this, "Sign up successful" + task.getException(),
-                                    Toast.LENGTH_LONG).show();
-                            addUserToDatabase(SignUpActivity.this,getApp().getFireBaseAuth().getCurrentUser());
-//                            startActivity(new Intent(SignUpActivity.this, HomeActivity.class));
-//                            finish();
+                            final String uid = task.getResult().getUser().getUid();
+                            Uri mImageUri = Uri.fromFile(new File(imagePathForFireBase));
+                            if(!TextUtils.isEmpty(imagePathForFireBase)) {
+                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("user_profile").child(imagePathForFireBase);
+                                filepath.putFile(mImageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                                        if (progress == 100) {
+//                                        hideProgressDialog();
+                                            //upload();
+                                        }
+                                        System.out.println("Upload is " + progress + "% done");
+                                    }
+                                }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                                        System.out.println("Upload is paused");
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception exception) {
+                                        // Handle unsuccessful uploads
+                                    }
+                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        /** Get Image Download Path**/
+                                        Uri downloadUri = taskSnapshot.getDownloadUrl();
+
+                                        /** Converting Image Uri In String **/
+
+                                        if (downloadUri != null) {
+                                            imagerls = downloadUri.toString();
+                                        }
+
+                                        //Add user data and image URL to firebase database
+                                        if (efProgressDialog.isShowing())
+                                            efProgressDialog.dismiss();
+                                        Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
+                                        addUserToDatabase(SignUpActivity.this, getApp().getFireBaseAuth().getCurrentUser());
+                                        finish();
+                                    }
+
+                                });
+
+                            }else{
+                                if (efProgressDialog.isShowing())
+                                    efProgressDialog.dismiss();
+                                Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
+                                addUserToDatabase(SignUpActivity.this, getApp().getFireBaseAuth().getCurrentUser());
+                                finish();
+                            }
                         }
-//                        alertUtils.dismissLoadingAlert();
+
                     }
                 });
     }
@@ -473,13 +542,13 @@ public class SignUpActivity extends BaseActivity {
     public void addUserToDatabase(Context context, FirebaseUser firebaseUser) {
         User user = new User(firebaseUser.getUid(),
                 firebaseUser.getEmail(),
-                FirebaseInstanceId.getInstance().getToken());
+                FirebaseInstanceId.getInstance().getToken(),imagerls);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)
                 .child(firebaseUser.getUid())
                 .setValue(user)
-                .addOnCompleteListener(new OnCompleteListener<Void> () {
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {

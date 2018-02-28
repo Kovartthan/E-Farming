@@ -10,12 +10,14 @@ import android.os.Bundle;
 
 import com.ko.efarming.EFApp;
 import com.ko.efarming.R;
+import com.ko.efarming.ui.EFProgressDialog;
 
 public class BaseActivity extends AppCompatActivity {
-
+    public EFProgressDialog efProgressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        efProgressDialog = new EFProgressDialog(this);
     }
 
     public EFApp getApp() {

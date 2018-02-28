@@ -11,12 +11,12 @@ import android.widget.ProgressBar;
 import com.ko.efarming.R;
 
 
-public class EFProgessDialog extends Dialog {
+public class EFProgressDialog extends Dialog {
 
     private Context mContext;
     ProgressBar progressBar;
 
-    public EFProgessDialog(Context context) {
+    public EFProgressDialog(Context context) {
         super(context, R.style.TransparentProgressDialog);
         this.mContext = (context).getApplicationContext();
     }

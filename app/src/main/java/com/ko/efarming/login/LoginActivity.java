@@ -16,6 +16,7 @@ import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +28,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
+import com.ko.efarming.home.HomeActivity;
 import com.ko.efarming.util.DeviceUtils;
 
 import static com.ko.efarming.util.DeviceUtils.hideSoftKeyboard;
@@ -43,9 +45,17 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        checkWhetherUserLoggedIn();
         init();
         setupDefault();
         setupEvent();
+    }
+
+    private void checkWhetherUserLoggedIn() {
+        if (getApp().getFireBaseAuth().getCurrentUser() != null) {
+            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+            finish();
+        }
     }
 
     private void init() {
@@ -76,13 +86,12 @@ public class LoginActivity extends BaseActivity {
                 super.updateDrawState(ds);
                 super.updateDrawState(ds);
                 ds.setUnderlineText(false);
-                ds.setColor(getResources().getColor(android.R.color.holo_green_dark));
             }
         };
 
-        signUpString.setSpan(new UnderlineSpan(), 0, 24, 0);
-        signUpString.setSpan(clickableSpan, 24, signUpString.length(), 0);
-        signUpString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(LoginActivity.this,android.R.color.white)), 24, signUpString.length(),  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        signUpString.setSpan(new UnderlineSpan(), 0, 23, 0);
+        signUpString.setSpan(clickableSpan, 23, signUpString.length(), 0);
+        signUpString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(LoginActivity.this,android.R.color.holo_green_dark)), 23, signUpString.length(),  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         txtSignUp.setText(signUpString, TextView.BufferType.SPANNABLE);
         txtSignUp.setMovementMethod(LinkMovementMethod.getInstance());
@@ -131,6 +140,14 @@ public class LoginActivity extends BaseActivity {
                 attemptLogin();
             }
         });
+
+        mPasswordView.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                attemptLogin();
+                return false;
+            }
+        });
     }
 
     private void attemptLogin() {
@@ -169,22 +186,31 @@ public class LoginActivity extends BaseActivity {
 
     private void doLogin() {
 
+        if(isFinishing())
+            return;
+
         hideSoftKeyboard(this);
 
-//        alertUtils.showLoadingAlert();
+        if(efProgressDialog != null)
+            efProgressDialog.show();
+
         getApp().getFireBaseAuth().signInWithEmailAndPassword(mEmailView.getText().toString(), mPasswordView.getText().toString())
                 .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (!task.isSuccessful()) {
+                            if(efProgressDialog != null)
+                                efProgressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "Authentication failed ", Toast.LENGTH_LONG).show();
                         } else {
+                            if(efProgressDialog != null)
+                                efProgressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "Logged in successfully", Toast.LENGTH_LONG).show();
-//                            addUserToDatabase(LoginActivity.this,getApp().getFireBaseAuth().getCurrentUser());
-                            startActivity(new Intent(LoginActivity.this, LoginActivity.class));
+                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                             finish();
                         }
-//                        alertUtils.dismissLoadingAlert();
+
+
                     }
                 });
     }

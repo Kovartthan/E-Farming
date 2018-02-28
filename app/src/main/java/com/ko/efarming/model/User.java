@@ -6,12 +6,13 @@ public class User implements Serializable {
     public String uid;
     public String email;
     public String firebaseToken;
-
+    public String userImage;
     public User() {}
 
-    public User(String uid, String email, String firebaseToken) {
+    public User(String uid, String email, String firebaseToken,String userImage) {
         this.uid = uid;
         this.email = email;
         this.firebaseToken = firebaseToken;
+        this.userImage = userImage;
     }
 }

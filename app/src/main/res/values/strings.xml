@@ -27,4 +27,6 @@
     <string name="go_to_settings_enable_permission">Go to settings and enable permissions</string>
     <string name="storage">Storage</string>
     <string name="camera">Camera</string>
+    <string name="don_t_have_an_account_then_signup">Don\'t have an account?\u0020 Sign up</string>
+    <string name="already_have_an_account_sign_in">Already have an account?\u0020 Sign in</string>
 </resources>
