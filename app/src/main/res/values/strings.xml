@@ -30,4 +30,6 @@
     <string name="don_t_have_an_account_then_signup">Don\'t have an account?\u0020 Sign up</string>
     <string name="already_have_an_account_sign_in">Already have an account?\u0020 Sign in</string>
     <string name="submit">Submit</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="name">Name</string>
 </resources>

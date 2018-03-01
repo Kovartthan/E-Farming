@@ -177,7 +177,7 @@ public class LoginActivity extends BaseActivity {
         }
 
         if (TextUtils.isEmpty(password)) {
-            passwordLayout.setError("Enter a valid email address");
+            passwordLayout.setError("Enter a password");
             passwordLayout.setErrorEnabled(true);
             return;
         }

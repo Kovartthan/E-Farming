@@ -78,10 +78,14 @@ public class SignUpActivity extends BaseActivity {
     private TextView txtSignUp;
     private EditText mEmailView;
     private EditText mPasswordView;
+    private EditText mName;
+    private EditText mConfirmPass;
+    private TextInputLayout nameLayout;
     private TextInputLayout emailLayout;
     private TextInputLayout passwordLayout;
+    private TextInputLayout confirmPassLayout;
     private Button mEmailSignInButton;
-    private   String imagerls = "";
+    private String imagerls = "";
     private String imagePathForFireBase = "";
 
     @Override
@@ -133,9 +137,13 @@ public class SignUpActivity extends BaseActivity {
         txtSignUp = findViewById(R.id.txt_sign_up);
         mEmailView = findViewById(R.id.email);
         mPasswordView = findViewById(R.id.password);
+        nameLayout = findViewById(R.id.name_layout);
         emailLayout = findViewById(R.id.email_layout);
         passwordLayout = findViewById(R.id.password_layout);
+        confirmPassLayout = findViewById(R.id.confirm_pass_layout);
         mEmailSignInButton = findViewById(R.id.email_sign_up_button);
+        mName = findViewById(R.id.name);
+        mConfirmPass = findViewById(R.id.conf_password);
     }
 
     private void setupDefault() {
@@ -218,6 +226,44 @@ public class SignUpActivity extends BaseActivity {
 
             }
         });
+
+
+        mConfirmPass.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                confirmPassLayout.setError(null);
+                confirmPassLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        mName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                nameLayout.setError(null);
+                nameLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
         mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -225,7 +271,7 @@ public class SignUpActivity extends BaseActivity {
             }
         });
 
-        mPasswordView.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+        mConfirmPass.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 attemptSignup();
@@ -448,6 +494,12 @@ public class SignUpActivity extends BaseActivity {
         String email = mEmailView.getText().toString().trim();
         String password = mPasswordView.getText().toString().trim();
 
+        if (TextUtils.isEmpty(mName.getText())) {
+            nameLayout.setError("Enter your name");
+            nameLayout.setErrorEnabled(true);
+            return;
+        }
+
         if (TextUtils.isEmpty(email)) {
             emailLayout.setError("Enter your email address");
             emailLayout.setErrorEnabled(true);
@@ -461,14 +513,31 @@ public class SignUpActivity extends BaseActivity {
         }
 
         if (TextUtils.isEmpty(password)) {
-            passwordLayout.setError("Enter a valid email address");
+            passwordLayout.setError("Enter a password");
             passwordLayout.setErrorEnabled(true);
+            return;
+        }
+
+        if (TextUtils.isEmpty(mConfirmPass.getText().toString())) {
+            confirmPassLayout.setError("Enter a confirm password");
+            confirmPassLayout.setErrorEnabled(true);
             return;
         }
 
         if (password.length() < 6) {
             passwordLayout.setError("Enter minimum 6 characters");
             passwordLayout.setErrorEnabled(true);
+            return;
+        }
+
+        if (mConfirmPass.length() < 6) {
+            confirmPassLayout.setError("Enter minimum 6 characters");
+            confirmPassLayout.setErrorEnabled(true);
+            return;
+        }
+
+        if (!password.equals(mConfirmPass.getText().toString())) {
+            AlertUtils.showAlert(this, "Please enter same password in both fields", null, false);
             return;
         }
 
@@ -490,7 +559,7 @@ public class SignUpActivity extends BaseActivity {
                         } else {
                             final String uid = task.getResult().getUser().getUid();
                             Uri mImageUri = Uri.fromFile(new File(imagePathForFireBase));
-                            if(!TextUtils.isEmpty(imagePathForFireBase)) {
+                            if (!TextUtils.isEmpty(imagePathForFireBase)) {
                                 StorageReference filepath = getApp().getFireBaseStorage().getReference().child("user_profile").child(imagePathForFireBase);
                                 filepath.putFile(mImageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                                     @Override
@@ -534,7 +603,7 @@ public class SignUpActivity extends BaseActivity {
 
                                 });
 
-                            }else{
+                            } else {
                                 if (efProgressDialog.isShowing())
                                     efProgressDialog.dismiss();
                                 Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
@@ -551,7 +620,7 @@ public class SignUpActivity extends BaseActivity {
     public void addUserToDatabase(Context context, FirebaseUser firebaseUser) {
         User user = new User(firebaseUser.getUid(),
                 firebaseUser.getEmail(),
-                FirebaseInstanceId.getInstance().getToken(),imagerls);
+                FirebaseInstanceId.getInstance().getToken(), imagerls);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)

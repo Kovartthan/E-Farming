@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class User implements Serializable {
     public String uid;
     public String email;
+    public String name;
     public String firebaseToken;
     public String userImage;
     public User() {}

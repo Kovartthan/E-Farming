@@ -74,6 +74,8 @@
 
                         <EditText
                             android:id="@+id/email"
+                            android:drawableLeft="@drawable/ic_email_black_18dp"
+                            android:drawablePadding="5dp"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/prompt_email"
