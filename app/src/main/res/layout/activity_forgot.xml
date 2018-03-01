@@ -96,7 +96,7 @@
                 android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="285dp"
+                android:layout_marginTop="295dp"
                 android:background="@drawable/ripple_green_button"
                 android:text="@string/submit"
                 android:textColor="@android:color/white"
