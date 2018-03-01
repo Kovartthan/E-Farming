@@ -1,16 +1,22 @@
 package com.ko.efarming.base;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.ko.efarming.EFApp;
 import com.ko.efarming.R;
 import com.ko.efarming.ui.EFProgressDialog;
+import com.ko.efarming.util.GpsUtils;
 
 public class BaseActivity extends AppCompatActivity {
     public EFProgressDialog efProgressDialog;
@@ -46,5 +52,36 @@ public class BaseActivity extends AppCompatActivity {
         myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
         myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.startActivity(myAppSettings);
+    }
+
+    private BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().matches(LocationManager.PROVIDERS_CHANGED_ACTION)) {
+
+                if(GpsUtils.isGpsEnabled(context)){
+                    Log.e("BaseActivity ", " Gps Enabled");
+                    onGpsStatusChanged(true);
+                }else {
+                    Log.e("BaseActivity ", " Gps Disabled");
+                    onGpsStatusChanged(false);
+                }
+            }
+        }
+    };
+
+    private void onGpsStatusChanged(boolean b) {
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(gpsReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(gpsReceiver);
     }
 }

@@ -28,6 +28,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
+import com.ko.efarming.company_info.CompanyInfoActivity;
 import com.ko.efarming.home.HomeActivity;
 import com.ko.efarming.util.DeviceUtils;
 
@@ -53,7 +54,7 @@ public class LoginActivity extends BaseActivity {
 
     private void checkWhetherUserLoggedIn() {
         if (getApp().getFireBaseAuth().getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+            startActivity(new Intent(LoginActivity.this, CompanyInfoActivity.class));
             finish();
         }
     }
@@ -213,7 +214,7 @@ public class LoginActivity extends BaseActivity {
                             if(efProgressDialog != null)
                                 efProgressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "Logged in successfully", Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                            startActivity(new Intent(LoginActivity.this, CompanyInfoActivity.class));
                             finish();
                         }
 

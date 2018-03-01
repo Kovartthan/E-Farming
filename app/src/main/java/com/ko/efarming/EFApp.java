@@ -14,7 +14,9 @@ import com.google.firebase.storage.FirebaseStorage;
 public class EFApp extends Application {
     private static EFApp mInstance;
     private FirebaseAuth auth;
-    private     FirebaseStorage storage;
+    private FirebaseStorage storage;
+    public static Context mContext;
+
     @Override
     protected void attachBaseContext(Context context) {
         super.attachBaseContext(context);
@@ -26,7 +28,7 @@ public class EFApp extends Application {
         super.onCreate();
         mInstance = this;
         auth = FirebaseAuth.getInstance();
-
+        mContext = getApplicationContext();
         storage = FirebaseStorage.getInstance();
     }
 
@@ -41,20 +43,23 @@ public class EFApp extends Application {
     }
 
 
-
-    public FirebaseAuth getFireBaseAuth(){
-        if(auth == null){
+    public FirebaseAuth getFireBaseAuth() {
+        if (auth == null) {
             auth = FirebaseAuth.getInstance();
             return auth;
         }
         return auth;
     }
 
-    public FirebaseStorage getFireBaseStorage(){
-        if(storage == null){
+    public FirebaseStorage getFireBaseStorage() {
+        if (storage == null) {
             storage = FirebaseStorage.getInstance();
             return storage;
         }
         return storage;
+    }
+
+    public static synchronized Context getContext() {
+        return mContext;
     }
 }
