@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,6 +30,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
+import com.ko.efarming.util.AlertUtils;
 import com.ko.efarming.util.FusedLocationSingleton;
 import com.ko.efarming.util.MarshMallowPermissionUtils;
 import com.ko.efarming.util.TextUtils;
@@ -44,7 +46,7 @@ import static com.ko.efarming.util.Constants.GET_LONGITUDE;
 import static com.ko.efarming.util.Constants.RC_MARSH_MALLOW_LOCATION_PERMISSION;
 
 public class AddressFetchActivity extends BaseActivity implements OnMapReadyCallback,
-        GoogleMap.OnMarkerDragListener, OnLocationListener, GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerDragListener, OnLocationListener, GoogleMap.OnMarkerClickListener, OnAddressListener {
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
     private boolean isPermissionFlag = false;
@@ -56,6 +58,8 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     private String address = "";
     private TextView txtAddress;
     private double getLat, getLong;
+    private boolean isMarkerPlaced;
+    private GeoCodingAsyncTask geoCodingAsyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +87,19 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
         } else {
             FusedLocationSingleton.getInstance().startLocationUpdates(AddressFetchActivity.this);
         }
+        forceLocationUpdates();
+    }
 
+    public void forceLocationUpdates() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            FusedLocationSingleton.getInstance().startLocationUpdates(AddressFetchActivity.this);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        FusedLocationSingleton.getInstance().stopLocationUpdates();
     }
 
     @Override
@@ -193,13 +209,16 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                     imgSubmitAddress.setVisibility(View.VISIBLE);
                     txtAddress.setText(address);
                 } else {
-                    txtAddress.setText(R.string.change_marker);
-                    imgSubmitAddress.setVisibility(View.INVISIBLE);
+                    if (efProgressDialog != null) {
+                        efProgressDialog.show();
+                    }
+                    geoCodingAsyncTask = new GeoCodingAsyncTask(position.latitude, position.longitude, AddressFetchActivity.this, efProgressDialog);
+                    geoCodingAsyncTask.setOnAddressListener(AddressFetchActivity.this);
+                    geoCodingAsyncTask.execute();
                 }
             }
         }, 300);
     }
-
 
 
     /**
@@ -208,6 +227,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
      * move the camera with animation
      */
     private void moveMap(double latitude, double longitude) {
+        mMap.clear();
         LatLng latLng = new LatLng(latitude, longitude);
         mMap.addMarker(new MarkerOptions()
                 .position(latLng)
@@ -219,15 +239,19 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
 
     @Override
     public void onLocationChanged(Location location) {
-
+//        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+//        moveMap(latLng.latitude,latLng.longitude);
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
+        mMap.animateCamera(cameraUpdate);
     }
 
     @Override
     public void onLocationConnected() {
-        getCurrentLocation();
+        getLastKnownLocation();
     }
 
-    private void getCurrentLocation() {
+    private void getLastKnownLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -239,8 +263,8 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                         if (location != null) {
                             // Logic to handle location object
                             moveMap(location.getLatitude(), location.getLongitude());
-                        }else{
-                            Location lastLocation = FusedLocationSingleton.getInstance().getLastLocation(AddressFetchActivity.this);
+                        } else {
+
                         }
                     }
                 });
@@ -258,33 +282,38 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     }
 
     private String getAddressFromTheMarker(double latitude, double longitude) {
-        List<Address> addresses;
+        List<Address> addresses = new ArrayList<>();
 
         StringBuilder locationAddress = new StringBuilder();
         ArrayList<String> locationList = new ArrayList<>();
         try {
             addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-            String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-            String city = addresses.get(0).getLocality();
-            String state = addresses.get(0).getAdminArea();
-            String country = addresses.get(0).getCountryName();
-            String postalCode = addresses.get(0).getPostalCode();
-            if (!TextUtils.isEmpty(address)) {
-                locationAddress.append(address);
-            } else {
-                if (!TextUtils.isEmpty(city))
-                    locationList.add(city);
-                if (!TextUtils.isEmpty(state))
-                    locationList.add(state);
-                if (!TextUtils.isEmpty(country))
-                    locationList.add(country);
-                if (!TextUtils.isEmpty(postalCode))
-                    locationList.add(postalCode);
-                for (int i = 0; i < locationList.size(); i++) {
-                    if (i == locationList.size() - 1) {
-                        locationAddress.append(locationList.get(i) + ".");
-                    } else {
-                        locationAddress.append(locationList.get(i) + ",");
+            if (addresses.size() <= 0) {
+                return "";
+            }
+            if (addresses.size() != 0) {
+                String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                String city = addresses.get(0).getLocality();
+                String state = addresses.get(0).getAdminArea();
+                String country = addresses.get(0).getCountryName();
+                String postalCode = addresses.get(0).getPostalCode();
+                if (!TextUtils.isEmpty(address)) {
+                    locationAddress.append(address);
+                } else {
+                    if (!TextUtils.isEmpty(city))
+                        locationList.add(city);
+                    if (!TextUtils.isEmpty(state))
+                        locationList.add(state);
+                    if (!TextUtils.isEmpty(country))
+                        locationList.add(country);
+                    if (!TextUtils.isEmpty(postalCode))
+                        locationList.add(postalCode);
+                    for (int i = 0; i < locationList.size(); i++) {
+                        if (i == locationList.size() - 1) {
+                            locationAddress.append(locationList.get(i) + ".");
+                        } else {
+                            locationAddress.append(locationList.get(i) + ",");
+                        }
                     }
                 }
             }
@@ -293,5 +322,21 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
             e.printStackTrace();
         }
         return locationAddress.toString();
+    }
+
+    @Override
+    public void onFetchedAddress(String address) {
+        if (!TextUtils.isEmpty(address)) {
+            imgSubmitAddress.setVisibility(View.VISIBLE);
+            txtAddress.setText(address);
+        } else {
+            imgSubmitAddress.setVisibility(View.INVISIBLE);
+            txtAddress.setText("Address fetching failed, check your Gps or Internet connection is enabled or not");
+        }
+    }
+
+    @Override
+    public void onFetchFailure() {
+        AlertUtils.showAlert(this, "Address fetching failed, check your Gps or Internet connection is enabled or not", null, false);
     }
 }

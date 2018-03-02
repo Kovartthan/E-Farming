@@ -35,5 +35,6 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.google.android.gms:play-services:11.8.0'
     implementation 'com.soundcloud.android:android-crop:1.0.1@aar'
+    compile "cz.msebera.android:httpclient:4.4.1.2"
 }
 apply plugin: 'com.google.gms.google-services'

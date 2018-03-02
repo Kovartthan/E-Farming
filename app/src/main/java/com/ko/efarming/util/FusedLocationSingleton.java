@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -43,12 +42,11 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
         buildGoogleApiClient();
     }
 
-   public OnLocationListener onLocationListener;
+    public OnLocationListener onLocationListener;
 
-    public void setOnLocationListener(OnLocationListener onLocationListener){
+    public void setOnLocationListener(OnLocationListener onLocationListener) {
         this.onLocationListener = onLocationListener;
     }
-
 
 
     @Override
@@ -65,8 +63,6 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
     }
 
 
-
-
     private synchronized void buildGoogleApiClient() {
         // setup googleapi client
         mGoogleApiClient = new GoogleApiClient.Builder(EFApp.getContext())
@@ -79,6 +75,7 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
     }
 
     ///////////// 2
+
     /**
      * config request location update
      */
@@ -90,6 +87,7 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
     }
 
     ///////////// 3
+
     /**
      * request location updates
      */
@@ -162,6 +160,7 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
 
     /**
      * get last available location
+     *
      * @return last known location
      */
     @SuppressLint("MissingPermission")
@@ -169,8 +168,7 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
         if (null != mGoogleApiClient && mGoogleApiClient.isConnected()) {
             // return last location
             return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        }
-        else {
+        } else {
             startLocationUpdates(activity); // start the updates
             return null;
         }
@@ -211,7 +209,11 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
         }
     }
 
-
+    public void connectGoogleApiClient() {
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
+    }
 
 
 }
