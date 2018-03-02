@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:theme="@style/AppTheme">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/main.collapsing"
@@ -19,8 +19,10 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginEnd="64dp"
-            app:expandedTitleMarginStart="48dp"
+            app:expandedTitleMarginEnd="50dp"
+            app:expandedTitleMarginStart="30dp"
+            app:expandedTitleTextAppearance="@style/ExpandAppBar"
+            app:collapsedTitleTextAppearance="@style/CollapseAppBar"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
 
@@ -33,9 +35,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="70dp"
+                    android:layout_marginTop="50dp"
+                    android:drawableTop="@drawable/ic_location_city_white_18dp"
                     android:text="@string/add_your_company_photo"
-                    android:textSize="22sp" />
+                    android:textColor="@android:color/white"
+                    android:textSize="22sp"
+                    app:layout_collapseMode="parallax" />
 
                 <ImageView
                     android:id="@+id/img_cmpny_photo"
@@ -51,8 +56,8 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+                app:layout_collapseMode="pin" />
+
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
@@ -65,8 +70,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
+            android:layout_marginTop="15dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
+
+
+            <include layout="@layout/common_layout_clear_focus"/>
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/cmpany_name_layout"
@@ -139,18 +148,18 @@
                 android:layout_marginTop="10dp">
 
                 <EditText
-                    android:id="@+id/location"
+                    android:id="@+id/cmy_location"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/ic_my_location_black_18dp"
                     android:drawablePadding="8dp"
-                    android:hint="@string/company_address"
                     android:ellipsize="end"
-                    android:inputType="phone"
-                    android:maxLength="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:hint="@string/company_address"
+                    android:inputType="text"
                     android:maxLines="3"
                     android:scrollHorizontally="false"
-                    android:singleLine="true"
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="12sp" />
 
@@ -164,7 +173,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="30dp"
                 android:background="@drawable/ripple_green_button"
-                android:text="Submit"
+                android:text="@string/submit"
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
 

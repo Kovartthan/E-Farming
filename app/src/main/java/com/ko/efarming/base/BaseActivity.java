@@ -9,9 +9,13 @@ import android.content.IntentFilter;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.Settings;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.widget.EditText;
 
 import com.ko.efarming.EFApp;
 import com.ko.efarming.R;
@@ -84,4 +88,27 @@ public class BaseActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(gpsReceiver);
     }
+
+
+    public void addTextChangeListener(EditText editText, final TextInputLayout textInputLayout){
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                textInputLayout.setError(null);
+                textInputLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+    }
+
+
 }

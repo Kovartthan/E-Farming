@@ -14,7 +14,6 @@ import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -26,10 +25,16 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.company_info.CompanyInfoActivity;
 import com.ko.efarming.home.HomeActivity;
+import com.ko.efarming.model.User;
+import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
 
 import static com.ko.efarming.util.DeviceUtils.hideSoftKeyboard;
@@ -42,6 +47,8 @@ public class LoginActivity extends BaseActivity {
     private TextView txtSignUp;
     private TextInputLayout emailLayout;
     private TextInputLayout passwordLayout;
+    private boolean isCompanyProfileUpdated = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,8 +61,13 @@ public class LoginActivity extends BaseActivity {
 
     private void checkWhetherUserLoggedIn() {
         if (getApp().getFireBaseAuth().getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, CompanyInfoActivity.class));
-            finish();
+            if (getWhetherUserCompletedCompanyProfile()) {
+                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                finish();
+            } else {
+                startActivity(new Intent(LoginActivity.this, CompanyInfoActivity.class));
+                finish();
+            }
         }
     }
 
@@ -79,7 +91,7 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onClick(final View view) {
                 DeviceUtils.hideSoftKeyboard(LoginActivity.this);
-                startActivity(new Intent(LoginActivity.this,SignUpActivity.class));
+                startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
             }
 
             @Override
@@ -92,7 +104,7 @@ public class LoginActivity extends BaseActivity {
 
 //        signUpString.setSpan(new UnderlineSpan(), 0, 23, 0);
         signUpString.setSpan(clickableSpan, 23, signUpString.length(), 0);
-        signUpString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(LoginActivity.this,android.R.color.holo_green_dark)), 23, signUpString.length(),  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        signUpString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(LoginActivity.this, android.R.color.holo_green_dark)), 23, signUpString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         txtSignUp.setText(signUpString, TextView.BufferType.SPANNABLE);
         txtSignUp.setMovementMethod(LinkMovementMethod.getInstance());
@@ -153,7 +165,7 @@ public class LoginActivity extends BaseActivity {
         findViewById(R.id.txt_frgt_pass).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(LoginActivity.this,ForgotActivity.class));
+                startActivity(new Intent(LoginActivity.this, ForgotActivity.class));
             }
         });
     }
@@ -194,12 +206,15 @@ public class LoginActivity extends BaseActivity {
 
     private void doLogin() {
 
-        if(isFinishing())
+        if (isFinishing())
             return;
-
         hideSoftKeyboard(this);
+        if (!DeviceUtils.isInternetConnected(this)) {
+            Toast.makeText(this, R.string.err_internet, Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        if(efProgressDialog != null)
+        if (efProgressDialog != null)
             efProgressDialog.show();
 
         getApp().getFireBaseAuth().signInWithEmailAndPassword(mEmailView.getText().toString(), mPasswordView.getText().toString())
@@ -207,19 +222,40 @@ public class LoginActivity extends BaseActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (!task.isSuccessful()) {
-                            if(efProgressDialog != null)
+                            if (efProgressDialog != null)
                                 efProgressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "Authentication failed ", Toast.LENGTH_LONG).show();
                         } else {
-                            if(efProgressDialog != null)
+                            if (efProgressDialog != null)
                                 efProgressDialog.dismiss();
+                            if (getWhetherUserCompletedCompanyProfile()) {
+                                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                                finish();
+                            } else {
+                                startActivity(new Intent(LoginActivity.this, CompanyInfoActivity.class));
+                                finish();
+                            }
                             Toast.makeText(LoginActivity.this, "Logged in successfully", Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(LoginActivity.this, CompanyInfoActivity.class));
-                            finish();
+
                         }
-
-
                     }
                 });
+    }
+
+    private boolean getWhetherUserCompletedCompanyProfile() {
+        DatabaseReference ref = getApp().getFireBaseDataBase().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid());
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                isCompanyProfileUpdated = user.isCompanyProfileUpdated;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("Firebase", "onCancelled", databaseError.toException());
+            }
+        });
+        return isCompanyProfileUpdated;
     }
 }

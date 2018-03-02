@@ -5,7 +5,10 @@ import android.content.Context;
 import android.support.multidex.MultiDex;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
+import com.ko.efarming.preference.AppPreference;
 
 /**
  * Created by ko on 2/27/2018.
@@ -16,7 +19,8 @@ public class EFApp extends Application {
     private FirebaseAuth auth;
     private FirebaseStorage storage;
     public static Context mContext;
-
+    private AppPreference mSharedPreferences;
+    private DatabaseReference firebaseDatabase;
     @Override
     protected void attachBaseContext(Context context) {
         super.attachBaseContext(context);
@@ -29,7 +33,9 @@ public class EFApp extends Application {
         mInstance = this;
         auth = FirebaseAuth.getInstance();
         mContext = getApplicationContext();
+        mSharedPreferences = new AppPreference(this);
         storage = FirebaseStorage.getInstance();
+        firebaseDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     public static EFApp getApp() {
@@ -59,7 +65,18 @@ public class EFApp extends Application {
         return storage;
     }
 
+    public DatabaseReference getFireBaseDataBase(){
+        if(firebaseDatabase == null){
+            firebaseDatabase = FirebaseDatabase.getInstance().getReference();
+        }
+        return firebaseDatabase;
+    }
+
     public static synchronized Context getContext() {
         return mContext;
+    }
+
+    public AppPreference getAppPreference() {
+        return mSharedPreferences;
     }
 }

@@ -8,12 +8,16 @@ public class User implements Serializable {
     public String name;
     public String firebaseToken;
     public String userImage;
-    public User() {}
+    public boolean isCompanyProfileUpdated;
+    public User() {
 
-    public User(String uid, String email, String firebaseToken,String userImage) {
+    }
+
+    public User(String uid, String email, String firebaseToken,String userImage,boolean isCompanyProfileUpdated) {
         this.uid = uid;
         this.email = email;
         this.firebaseToken = firebaseToken;
         this.userImage = userImage;
+        this.isCompanyProfileUpdated = isCompanyProfileUpdated;
     }
 }

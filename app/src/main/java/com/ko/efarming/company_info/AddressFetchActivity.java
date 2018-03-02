@@ -1,6 +1,7 @@
 package com.ko.efarming.company_info;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -37,6 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.ko.efarming.util.Constants.GET_ADDRESS;
+import static com.ko.efarming.util.Constants.GET_LATITUDE;
+import static com.ko.efarming.util.Constants.GET_LONGITUDE;
 import static com.ko.efarming.util.Constants.RC_MARSH_MALLOW_LOCATION_PERMISSION;
 
 public class AddressFetchActivity extends BaseActivity implements OnMapReadyCallback,
@@ -51,6 +55,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     private ImageView imgSubmitAddress, imgBack;
     private String address = "";
     private TextView txtAddress;
+    private double getLat, getLong;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,8 +139,14 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 if (!TextUtils.isNullOrEmpty(address)) {
+                    Intent addressIntent = new Intent();
+                    addressIntent.putExtra(GET_ADDRESS, address);
+                    addressIntent.putExtra(GET_LATITUDE, getLat);
+                    addressIntent.putExtra(GET_LONGITUDE, getLong);
                     setResult(RESULT_OK);
                     finish();
+                } else {
+                    Toast.makeText(AddressFetchActivity.this, "No address found", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -146,6 +157,14 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
         mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMarkerDragListener(this);
+        addLocationButton();
+    }
+
+    private void addLocationButton() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
     }
 
     @Override
@@ -181,22 +200,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
         }, 300);
     }
 
-    private void getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            // Logic to handle location object
-                            moveMap(location.getLatitude(), location.getLongitude());
-                        }
-                    }
-                });
-    }
+
 
     /**
      * Creating the latlng object to store lat, long coordinates
@@ -221,6 +225,25 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     @Override
     public void onLocationConnected() {
         getCurrentLocation();
+    }
+
+    private void getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            // Logic to handle location object
+                            moveMap(location.getLatitude(), location.getLongitude());
+                        }else{
+                            Location lastLocation = FusedLocationSingleton.getInstance().getLastLocation(AddressFetchActivity.this);
+                        }
+                    }
+                });
     }
 
     @Override

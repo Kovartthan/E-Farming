@@ -52,6 +52,7 @@ import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.model.User;
 import com.ko.efarming.util.AlertUtils;
+import com.ko.efarming.util.CameraUtils;
 import com.ko.efarming.util.CompressImage;
 import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
@@ -87,17 +88,17 @@ public class SignUpActivity extends BaseActivity {
     private Button mEmailSignInButton;
     private String imagerls = "";
     private String imagePathForFireBase = "";
-
+    private CameraUtils cameraUtils;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_PICTURE_FROM_GALLERY) {
-                imagPaths = getPaths(this, data, true);
+                imagPaths = cameraUtils.getPaths(this, data, true);
                 imagePathForFireBase = imagPaths[0];
                 File file = new File(imagPaths[0]);
                 if (file.exists()) {
-                    startCrop(file.getAbsolutePath());
+                    cameraUtils.startCrop(file.getAbsolutePath());
                 }
 
             } else if (requestCode == REQUEST_PICTURE_FROM_CAMERA) {
@@ -113,7 +114,7 @@ public class SignUpActivity extends BaseActivity {
                     imagPaths = new String[]{path};
                     File file = new File(imagPaths[0]);
                     if (file.exists()) {
-                        startCrop(file.getAbsolutePath());
+                        cameraUtils.startCrop(file.getAbsolutePath());
                     }
                 }
             }
@@ -144,6 +145,7 @@ public class SignUpActivity extends BaseActivity {
         mEmailSignInButton = findViewById(R.id.email_sign_up_button);
         mName = findViewById(R.id.name);
         mConfirmPass = findViewById(R.id.conf_password);
+        cameraUtils = new CameraUtils(this,SignUpActivity.this);
     }
 
     private void setupDefault() {
@@ -178,91 +180,25 @@ public class SignUpActivity extends BaseActivity {
 
 
     private void setupEvent() {
+
         imgPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 DeviceUtils.hideSoftKeyboard(SignUpActivity.this, view);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (checkAndRequestCameraPermissions()) {
-                        promptMediaOption();
+                    if (cameraUtils.checkAndRequestCameraPermissions()) {
+                        cameraUtils.promptMediaOption();
                     }
                 } else {
-                    promptMediaOption();
+                    cameraUtils.promptMediaOption();
                 }
             }
         });
-        mEmailView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                emailLayout.setError(null);
-                emailLayout.setErrorEnabled(false);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-        mPasswordView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                passwordLayout.setError(null);
-                passwordLayout.setErrorEnabled(false);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-
-        mConfirmPass.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                confirmPassLayout.setError(null);
-                confirmPassLayout.setErrorEnabled(false);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-        mName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                nameLayout.setError(null);
-                nameLayout.setErrorEnabled(false);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
+        addTextChangeListener(mEmailView,emailLayout);
+        addTextChangeListener(mPasswordView,passwordLayout);
+        addTextChangeListener(mConfirmPass,confirmPassLayout);
+        addTextChangeListener(mName,nameLayout);
 
         mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -278,128 +214,20 @@ public class SignUpActivity extends BaseActivity {
                 return false;
             }
         });
-
         findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
-
-
-    }
-
-    private void promptMediaOption() {
-
-        final String[] ITEMS = {"Take Picture", "Choose Image"};
-
-        openOptionDialog(this, ITEMS, "" + getString(R.string.app_name), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == 0) {
-                    openCamera();
-                } else {
-                    openGallery();
-                }
-            }
-        });
-    }
-
-    private void openCamera() {
-        String filePath = TempManager.createTempPictureFile(this).getAbsolutePath();
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(filePath)));
-        } else {
-            File file = new File(filePath);
-            Uri photoUri = FileProvider
-                    .getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".provider", file);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-        }
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(intent, REQUEST_PICTURE_FROM_CAMERA);
-    }
-
-    private void openGallery() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent = Intent.createChooser(intent, "Choose Image");
-        startActivityForResult(intent, REQUEST_PICTURE_FROM_GALLERY);
     }
 
 
-    public String[] getPaths(Context context, Intent intent, boolean isPicture) {
-        ClipData clipData = intent.getClipData();
-        String[] paths = new String[0];
-        if (clipData != null) {
-            paths = new String[clipData.getItemCount()];
-            for (int i = 0; i < clipData.getItemCount(); i++) {
-                ClipData.Item item = clipData.getItemAt(i);
-                String path = FileUtils2.getPath(context, item.getUri());
-                paths[i] = path;
-            }
-        } else {
-            if (intent.getData() != null) {
-                paths = new String[1];
-                paths[0] = FileUtils2.getPath(context, intent.getData());
-            }
-        }
-        return paths;
-    }
-
-    private static void openOptionDialog(final Context context, String[] items, String title, DialogInterface.OnClickListener positiveClick) {
-        ListAdapter adapter = new ArrayAdapter<String>(
-                context, android.R.layout.select_dialog_item, items) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView textView = (TextView) view.findViewById(android.R.id.text1);
-                textView.setText(getItem(position));
-                textView.setTextSize(16f);
-                if (position == 0) {
-                    textView.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_camera, 0, 0, 0);
-                    textView.setCompoundDrawablePadding(DeviceUtils.getPixelFromDp(context, 15));
-                } else {
-                    textView.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_gallery, 0, 0, 0);
-                    textView.setCompoundDrawablePadding(DeviceUtils.getPixelFromDp(context, 15));
-                }
-                return view;
-            }
-        };
-        android.support.v7.app.AlertDialog.Builder builder = AlertUtils.getBuilder(context);
-        builder.setTitle(title);
-        builder.setAdapter(adapter, positiveClick);
-        builder.create().show();
-    }
-
-    private boolean checkAndRequestCameraPermissions() {
-        int storagePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        if (storagePermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-
-        if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.CAMERA);
-        }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), REQUEST_PERMISSION_READ_STORAGE);
-
-            return false;
-        }
-        return true;
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-
-
             case REQUEST_PERMISSION_READ_STORAGE: {
                 Map<String, Integer> perms = new HashMap<>();
                 perms.put(Manifest.permission.READ_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
@@ -417,7 +245,7 @@ public class SignUpActivity extends BaseActivity {
                                 requestPermissions(PERMISSIONS, 5);
                             }
                         } else {
-                            promptMediaOption();
+                            cameraUtils.promptMediaOption();
                         }
                     } else {
                         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
@@ -425,7 +253,7 @@ public class SignUpActivity extends BaseActivity {
                             AlertUtils.showAlert(this, getResources().getString(R.string.storage_permission_required), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    checkAndRequestCameraPermissions();
+                                    cameraUtils.checkAndRequestCameraPermissions();
                                 }
                             }, false);
                         } else {
@@ -451,7 +279,7 @@ public class SignUpActivity extends BaseActivity {
             break;
             case 5:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    promptMediaOption();
+                    cameraUtils.promptMediaOption();
                 } else {
 //                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
                     if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
@@ -461,17 +289,12 @@ public class SignUpActivity extends BaseActivity {
                         AlertUtils.showAlert(this, getResources().getString(R.string.storage_permission_required), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                checkAndRequestCameraPermissions();
+                                cameraUtils.checkAndRequestCameraPermissions();
                             }
                         }, false);
                     }
                 }
         }
-    }
-
-    private void startCrop(String source) {
-//        String outputUrl=TempManager.createTempPictureFile(this).getAbsolutePath();
-        Crop.of(Uri.fromFile(new File(source)), Uri.fromFile(new File(source))).start(SignUpActivity.this);
     }
 
     private void handleCrop(int resultCode, Intent result) {
@@ -545,6 +368,17 @@ public class SignUpActivity extends BaseActivity {
     }
 
     private void doSignUp() {
+
+        if(isFinishing())
+            return;
+
+        hideSoftKeyboard(this);
+
+        if (!DeviceUtils.isInternetConnected(this)) {
+            Toast.makeText(this, R.string.err_internet, Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (efProgressDialog != null)
             efProgressDialog.show();
         getApp().getFireBaseAuth().createUserWithEmailAndPassword(mEmailView.getText().toString(), mPasswordView.getText().toString())
@@ -620,7 +454,7 @@ public class SignUpActivity extends BaseActivity {
     public void addUserToDatabase(Context context, FirebaseUser firebaseUser) {
         User user = new User(firebaseUser.getUid(),
                 firebaseUser.getEmail(),
-                FirebaseInstanceId.getInstance().getToken(), imagerls);
+                FirebaseInstanceId.getInstance().getToken(), imagerls,false);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)
@@ -637,6 +471,4 @@ public class SignUpActivity extends BaseActivity {
                     }
                 });
     }
-
-
 }

@@ -11,7 +11,10 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.ko.efarming.EFApp;
 import com.ko.efarming.R;
+import com.ko.efarming.company_info.CompanyInfoActivity;
+import com.ko.efarming.home.HomeActivity;
 import com.ko.efarming.login.LoginActivity;
 
 public class SplashActivity extends AppCompatActivity {
@@ -29,8 +32,18 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-                finish();
+                if (EFApp.getApp().getAppPreference().getCheckRedirect() == 0) {
+                    if (EFApp.getApp().getFireBaseAuth().getCurrentUser() != null) {
+                        startActivity(new Intent(SplashActivity.this, CompanyInfoActivity.class));
+                        finish();
+                    } else {
+                        startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+                        finish();
+                    }
+                } else if (EFApp.getApp().getAppPreference().getCheckRedirect() == 1) {
+                    startActivity(new Intent(SplashActivity.this, HomeActivity.class));
+                    finish();
+                }
             }
         }, SPLASH_TIME_OUT);
     }
