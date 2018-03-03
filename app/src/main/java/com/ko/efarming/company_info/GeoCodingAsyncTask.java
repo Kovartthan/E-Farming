@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.ko.efarming.ui.EFProgressDialog;
+import com.ko.efarming.util.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,11 +48,11 @@ class GeoCodingAsyncTask extends AsyncTask<String, Void, String[]> {
     protected String[] doInBackground(String... params) {
         String response;
         try {
-            response = getLatLongByURL("https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyAfPYXZkpF_Ll5Gvz8XhoHo0aY8jx_TCFY&latlng="+latitiude+","+longtitude+"&sensor=false");
+            response = getLatLongByURL("https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyBw-S5WVUZ9GB-wc64hkhpoTp34aLz77cg&latlng="+latitiude+","+longtitude);
             Log.d("response",""+response);
             return new String[]{response};
         } catch (Exception e) {
-            delegate.onFetchFailure();
+            delegate.onFetchFailure("");
             return new String[]{"error"};
         }
     }
@@ -118,10 +119,12 @@ class GeoCodingAsyncTask extends AsyncTask<String, Void, String[]> {
                     }
                     delegate.onFetchedAddress(locationAddress.toString());
                 }
+            }else{
+                delegate.onFetchFailure(Constants.LOCATION_FETCH_FAILED);
             }
         }catch (JSONException e) {
             e.printStackTrace();
-            delegate.onFetchFailure();
+            delegate.onFetchFailure("");
         }
         efProgressDialog.dismiss();
 
@@ -153,7 +156,7 @@ class GeoCodingAsyncTask extends AsyncTask<String, Void, String[]> {
             }
 
         } catch (Exception e) {
-            delegate.onFetchFailure();
+            delegate.onFetchFailure("");
             e.printStackTrace();
         }
         return response;

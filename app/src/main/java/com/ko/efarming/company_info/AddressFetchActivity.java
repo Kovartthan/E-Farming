@@ -1,7 +1,10 @@
 package com.ko.efarming.company_info;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -11,15 +14,26 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,9 +42,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.ko.efarming.EFApp;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.util.AlertUtils;
+import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.FusedLocationSingleton;
 import com.ko.efarming.util.MarshMallowPermissionUtils;
 import com.ko.efarming.util.TextUtils;
@@ -43,10 +59,12 @@ import java.util.Locale;
 import static com.ko.efarming.util.Constants.GET_ADDRESS;
 import static com.ko.efarming.util.Constants.GET_LATITUDE;
 import static com.ko.efarming.util.Constants.GET_LONGITUDE;
-import static com.ko.efarming.util.Constants.RC_MARSH_MALLOW_LOCATION_PERMISSION;
+import static com.ko.efarming.util.Constants.REQUEST_CHECK_SETTINGS;
 
 public class AddressFetchActivity extends BaseActivity implements OnMapReadyCallback,
-        GoogleMap.OnMarkerDragListener, OnLocationListener, GoogleMap.OnMarkerClickListener, OnAddressListener {
+        GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener, OnAddressListener,GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
     private boolean isPermissionFlag = false;
@@ -60,6 +78,28 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     private double getLat, getLong;
     private boolean isMarkerPlaced;
     private GeoCodingAsyncTask geoCodingAsyncTask;
+    private FusedLocationSingleton fusedLocationSingleton;
+    protected GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    public final static int FAST_LOCATION_FREQUENCY = 1000;
+    public final static int LOCATION_FREQUENCY = 2 * 1000;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
+        switch (requestCode) {
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        startLocationUpdates(AddressFetchActivity.this);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,63 +110,12 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
         setupEvent();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.e(TAG, "Called");
-        if (isPermissionFlag) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                boolean result = MarshMallowPermissionUtils.checkLocationPermissionStatus(AddressFetchActivity.this);
-                if (result) {
-                    isPermissionFlag = false;
-//                    startLocationUpdates();
-                } else {
-                    MarshMallowPermissionUtils.navigateToSettingsForLocation(AddressFetchActivity.this);
-                }
-            }
-        } else {
-            FusedLocationSingleton.getInstance().startLocationUpdates(AddressFetchActivity.this);
-        }
-        forceLocationUpdates();
-    }
-
-    public void forceLocationUpdates() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            FusedLocationSingleton.getInstance().startLocationUpdates(AddressFetchActivity.this);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        FusedLocationSingleton.getInstance().stopLocationUpdates();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-
-            case RC_MARSH_MALLOW_LOCATION_PERMISSION: {
-                Log.e(TAG, "Request code accept");
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                    Log.e(TAG, "Marshmallow enters");
-                    isPermissionFlag = true;
-//                    MarshMallowPermissionUtils.navigateToSettingsForLocation(SignUpActivity.this);
-                }
-            }
-        }
-    }
-
-
     private void init() {
+        buildGoogleApiClient();
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        FusedLocationSingleton.getInstance().setOnLocationListener(this);
         geocoder = new Geocoder(this, Locale.getDefault());
         txtTitle = findViewById(R.id.txt_title);
         imgSubmitAddress = findViewById(R.id.img_right_first);
@@ -139,9 +128,14 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
         txtAddress.setText(R.string.address_marker);
         imgBack.setImageResource(R.drawable.ic_arrow_back_white_24dp);
         imgBack.setVisibility(View.VISIBLE);
-        MarshMallowPermissionUtils.checkLocationPermissionStatus(AddressFetchActivity.this);
         imgSubmitAddress.setImageResource(R.drawable.ic_done_white_24dp);
         imgSubmitAddress.setVisibility(View.INVISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startLocationUpdates(AddressFetchActivity.this);
+            }
+        },200);
     }
 
     private void setupEvent() {
@@ -159,7 +153,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                     addressIntent.putExtra(GET_ADDRESS, address);
                     addressIntent.putExtra(GET_LATITUDE, getLat);
                     addressIntent.putExtra(GET_LONGITUDE, getLong);
-                    setResult(RESULT_OK);
+                    setResult(RESULT_OK,addressIntent);
                     finish();
                 } else {
                     Toast.makeText(AddressFetchActivity.this, "No address found", Toast.LENGTH_LONG).show();
@@ -191,11 +185,13 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     @Override
     public void onMarkerDragStart(Marker marker) {
         txtAddress.setText(R.string.fetch_address);
+        imgSubmitAddress.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void onMarkerDrag(Marker marker) {
         txtAddress.setText(R.string.fetch_address);
+        imgSubmitAddress.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -233,23 +229,10 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                 .position(latLng)
                 .draggable(true));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
         mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-//        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-//        moveMap(latLng.latitude,latLng.longitude);
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
-        mMap.animateCamera(cameraUpdate);
-    }
-
-    @Override
-    public void onLocationConnected() {
-        getLastKnownLocation();
-    }
 
     private void getLastKnownLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -270,16 +253,6 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                 });
     }
 
-    @Override
-    public void onLocationConnectionSuspended() {
-        Toast.makeText(AddressFetchActivity.this, "Exit this page and try again", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onLocationConnectionFailed() {
-        Toast.makeText(AddressFetchActivity.this, "Check your gps signal or click and try again", Toast.LENGTH_LONG).show();
-        finish();
-    }
 
     private String getAddressFromTheMarker(double latitude, double longitude) {
         List<Address> addresses = new ArrayList<>();
@@ -336,7 +309,173 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     }
 
     @Override
-    public void onFetchFailure() {
-        AlertUtils.showAlert(this, "Address fetching failed, check your Gps or Internet connection is enabled or not", null, false);
+    public void onFetchFailure(String status) {
+        if (Constants.LOCATION_FETCH_FAILED.equals(status)) {
+            AlertUtils.showAlert(this, "Address fetching failed, check your Gps or Internet connection is enabled or not", null, false);
+        } else {
+            AlertUtils.showAlert(this, "Address fetching failed, check your Gps or Internet connection is enabled or not", null, false);
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        stopLocationUpdates();
+    }
+
+
+    private synchronized void buildGoogleApiClient() {
+        // setup googleapi client
+        mGoogleApiClient = new GoogleApiClient.Builder(EFApp.getContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+        // setup location updates
+        configRequestLocationUpdate();
+    }
+
+
+    /**
+     * config request location update
+     */
+    private void configRequestLocationUpdate() {
+        mLocationRequest = new LocationRequest()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(LOCATION_FREQUENCY)
+                .setFastestInterval(FAST_LOCATION_FREQUENCY);
+    }
+
+
+    /**
+     * request location updates
+     */
+    @SuppressLint("MissingPermission")
+    private void requestLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient,
+                mLocationRequest,
+                this
+        );
+
+
+    }
+
+    /**
+     * start location updates
+     */
+    public void startLocationUpdates(final Activity activity) {
+        // connect and force the updates
+        mGoogleApiClient.connect();
+        if (mGoogleApiClient.isConnected()) {
+            requestLocationUpdates();
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                    .addLocationRequest(new LocationRequest().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY));
+
+            PendingResult<LocationSettingsResult> result =
+                    LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+
+            result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+                @Override
+                public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
+
+                    final Status status = locationSettingsResult.getStatus();
+
+                    Log.e("Fused", "onResult() called with: " + "result = [" + status.getStatusMessage() + "]");
+                    switch (status.getStatusCode()) {
+                        case LocationSettingsStatusCodes.SUCCESS:
+
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            try {
+                                status.startResolutionForResult(activity, REQUEST_CHECK_SETTINGS);
+                            } catch (IntentSender.SendIntentException e) {
+                                Log.d("Fused", "", e);
+                                // Ignore the error.
+                            }
+
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+
+                            break;
+                    }
+
+                }
+            });
+        }
+
+    }
+
+    /**
+     * removes location updates from the FusedLocationApi
+     */
+    public void stopLocationUpdates() {
+        // stop updates, disconnect from google api
+        if (null != mGoogleApiClient && mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
+
+    }
+
+    /**
+     * get last available location
+     *
+     * @return last known location
+     */
+    @SuppressLint("MissingPermission")
+    public Location getLastLocation(Activity activity) {
+        if (null != mGoogleApiClient && mGoogleApiClient.isConnected()) {
+            // return last location
+            return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        } else {
+            startLocationUpdates(activity); // start the updates
+            return null;
+        }
+    }
+
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        // do location updates
+        requestLocationUpdates();
+        //        if (!isMarkerPlaced) {
+//            getLastKnownLocation();
+//        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        // connection to Google Play services was lost for some reason
+        Toast.makeText(AddressFetchActivity.this, "Retrying....", Toast.LENGTH_LONG).show();
+        if (null != mGoogleApiClient) {
+            mGoogleApiClient.connect(); // attempt to establish a new connection
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Toast.makeText(AddressFetchActivity.this, "Check your gps signal or click and try again", Toast.LENGTH_LONG).show();
+        finish();
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if (location != null) {
+            // send location in broadcast
+            Intent intent = new Intent(Constants.INTENT_FILTER_LOCATION_UPDATE);
+            intent.putExtra(Constants.LBM_EVENT_LOCATION_UPDATE, location);
+            LocalBroadcastManager.getInstance(EFApp.getContext()).sendBroadcast(intent);
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            moveMap(latLng.latitude, latLng.longitude);
+            isMarkerPlaced = true;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopLocationUpdates();
     }
 }

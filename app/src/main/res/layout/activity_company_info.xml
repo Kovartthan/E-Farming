@@ -145,6 +145,7 @@
                 android:id="@+id/location_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:scrollHorizontally="false"
                 android:layout_marginTop="10dp">
 
                 <EditText

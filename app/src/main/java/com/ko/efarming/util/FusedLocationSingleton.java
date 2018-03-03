@@ -42,6 +42,7 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
         buildGoogleApiClient();
     }
 
+
     public OnLocationListener onLocationListener;
 
     public void setOnLocationListener(OnLocationListener onLocationListener) {
@@ -70,6 +71,7 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+        mGoogleApiClient.connect();
         // setup location updates
         configRequestLocationUpdate();
     }
@@ -186,10 +188,10 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
     @Override
     public void onConnectionSuspended(int i) {
         // connection to Google Play services was lost for some reason
-        onLocationListener.onLocationConnectionSuspended();
         if (null != mGoogleApiClient) {
             mGoogleApiClient.connect(); // attempt to establish a new connection
         }
+        onLocationListener.onLocationConnectionSuspended();
     }
 
     @Override
@@ -201,17 +203,24 @@ public class FusedLocationSingleton implements GoogleApiClient.ConnectionCallbac
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
-            onLocationListener.onLocationChanged(location);
             // send location in broadcast
             Intent intent = new Intent(Constants.INTENT_FILTER_LOCATION_UPDATE);
             intent.putExtra(Constants.LBM_EVENT_LOCATION_UPDATE, location);
             LocalBroadcastManager.getInstance(EFApp.getContext()).sendBroadcast(intent);
+            onLocationListener.onLocationChanged(location);
         }
     }
 
     public void connectGoogleApiClient() {
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
+        }
+    }
+
+    public void disConnectGoogleApiClient() {
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+            mGoogleApiClient = null;
         }
     }
 

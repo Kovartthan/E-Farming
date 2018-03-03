@@ -6,5 +6,5 @@ package com.ko.efarming.company_info;
 
 public interface OnAddressListener {
     void onFetchedAddress(String address);
-    void onFetchFailure();
+    void onFetchFailure(String status);
 }

@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TextInputLayout;
@@ -39,6 +40,7 @@ import com.ko.efarming.util.CameraUtils;
 import com.ko.efarming.util.CompressImage;
 import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
+import com.ko.efarming.util.MarshMallowPermissionUtils;
 import com.ko.efarming.util.TempManager;
 import com.soundcloud.android.crop.Crop;
 
@@ -51,12 +53,13 @@ import static com.ko.efarming.util.Constants.GET_LATITUDE;
 import static com.ko.efarming.util.Constants.GET_LONGITUDE;
 import static com.ko.efarming.util.Constants.PERMISSIONS;
 import static com.ko.efarming.util.Constants.RC_ADDRESS;
+import static com.ko.efarming.util.Constants.RC_MARSH_MALLOW_LOCATION_PERMISSION;
 import static com.ko.efarming.util.Constants.REQUEST_PERMISSION_READ_STORAGE;
 import static com.ko.efarming.util.Constants.REQUEST_PICTURE_FROM_CAMERA;
 import static com.ko.efarming.util.Constants.REQUEST_PICTURE_FROM_GALLERY;
 import static com.ko.efarming.util.DeviceUtils.hideSoftKeyboard;
 
-public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.OnOffsetChangedListener{
+public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.OnOffsetChangedListener {
     private Toolbar toolbar;
     private ImageView imgPhoto;
     private TextInputLayout cmpanyNameLayout;
@@ -71,7 +74,9 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
     private String[] imagPaths = null;
     private CameraUtils cameraUtils;
     private AppBarLayout appBarLayout;
-    private double putLat,putLong;
+    private double putLat, putLong;
+    private boolean isPermissionFlag = false;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -103,14 +108,14 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
             }
             if (requestCode == Crop.REQUEST_CROP) {
                 handleCrop(resultCode, data);
-            }else if(requestCode == RC_ADDRESS){
-                if(data != null){
-                    if(data.hasExtra(GET_ADDRESS)) {
+            } else if (requestCode == RC_ADDRESS) {
+                if (data != null) {
+                    if (data.hasExtra(GET_ADDRESS)) {
                         edtCmyLocation.setText(data.getStringExtra(GET_ADDRESS));
                     }
-                    if(data.hasExtra(GET_LATITUDE) && data.hasExtra(GET_LONGITUDE)){
-                        putLat = data.getDoubleExtra(GET_LATITUDE,0);
-                        putLong = data.getDoubleExtra(GET_LONGITUDE,0);
+                    if (data.hasExtra(GET_LATITUDE) && data.hasExtra(GET_LONGITUDE)) {
+                        putLat = data.getDoubleExtra(GET_LATITUDE, 0);
+                        putLong = data.getDoubleExtra(GET_LONGITUDE, 0);
                     }
                 }
             }
@@ -168,7 +173,19 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
         edtCmyLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityForResult(new Intent(CompanyInfoActivity.this, AddressFetchActivity.class),RC_ADDRESS);
+                boolean result = MarshMallowPermissionUtils.checkLocationPermissionStatus(CompanyInfoActivity.this);
+                if (!result) {
+                    MarshMallowPermissionUtils.checkLocationPermission(CompanyInfoActivity.this);
+                } else {
+                    efProgressDialog.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            efProgressDialog.dismiss();
+                            startActivityForResult(new Intent(CompanyInfoActivity.this, AddressFetchActivity.class), RC_ADDRESS);
+                        }
+                    },400);
+                }
             }
         });
         addTextChangeListener(edtCmyName, cmpanyNameLayout);
@@ -260,8 +277,29 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                         }, false);
                     }
                 }
+                break;
+            case RC_MARSH_MALLOW_LOCATION_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    efProgressDialog.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            efProgressDialog.dismiss();
+                            startActivityForResult(new Intent(CompanyInfoActivity.this, AddressFetchActivity.class), RC_ADDRESS);
+                        }
+                    },400);
+                } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    AlertUtils.showAlert(this, getResources().getString(R.string.location_permission_required), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            MarshMallowPermissionUtils.checkLocationPermission(CompanyInfoActivity.this);
+                        }
+                    }, false);
+                }
+                break;
         }
     }
+
 
     private void attemptAddCompanyInfo() {
 
@@ -312,7 +350,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
     }
 
     private void addCompanyInfoToPublic() {
-        CompanyInfoPublic companyInfo = new CompanyInfoPublic(edtCmyName.getText().toString(), edtCmyEmail.getText().toString(), edtCmyPhone.getText().toString(), edtCmyLocation.getText().toString(),imagerls,putLat,putLong);
+        CompanyInfoPublic companyInfo = new CompanyInfoPublic(edtCmyName.getText().toString(), edtCmyEmail.getText().toString(), edtCmyPhone.getText().toString(), edtCmyLocation.getText().toString(), imagerls, putLat, putLong);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.COMPANY_INFO)
