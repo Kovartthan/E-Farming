@@ -345,7 +345,6 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
             efProgressDialog.show();
 
         addCompanyInfoToUsersDatabase();
-        addCompanyInfoToPublic();
         redirectToHomeScreen();
     }
 
@@ -354,6 +353,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.COMPANY_INFO)
+                .child(edtCmyName.getText().toString())
                 .setValue(companyInfo)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -370,8 +370,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
     private void addCompanyInfoToUsersDatabase() {
         CompanyInfo companyInfo = new CompanyInfo(edtCmyName.getText().toString(), edtCmyEmail.getText().toString(), edtCmyPhone.getText().toString(), edtCmyLocation.getText().toString());
         FirebaseDatabase.getInstance()
-                .getReference()
-                .child(Constants.USERS)
+                .getReference(Constants.USERS)
                 .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
                 .child(Constants.COMPANY_INFO)
                 .setValue(companyInfo)
@@ -408,14 +407,15 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                                         if (downloadUri != null) {
                                             imagerls = downloadUri.toString();
                                         }
-                                        redirectToHomeScreen();
+//                                        redirectToHomeScreen();
                                     }
 
                                 });
 
                             } else {
-                                redirectToHomeScreen();
+//                                redirectToHomeScreen();
                             }
+                            addCompanyInfoToPublic();
                         } else {
                             isAddedDbPrivate = false;
                         }
@@ -441,18 +441,6 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
 
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-
-//        if (Math.abs(verticalOffset) == appBarLayout.getTotalScrollRange()) {
-//            // Collapsed
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary,null));
-//            }else{
-//                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-//            }
-//            return;
-//        }
-//
-//        toolbar.setBackgroundColor(0);
 
     }
 }

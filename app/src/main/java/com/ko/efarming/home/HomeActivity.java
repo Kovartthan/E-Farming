@@ -1,24 +1,22 @@
 package com.ko.efarming.home;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.View;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
-import com.ko.efarming.company_info.AddressFetchActivity;
-import com.ko.efarming.login.LoginActivity;
+import com.ko.efarming.home.fragments.ProductListFragment;
 import com.ko.efarming.model.RectClass;
 import com.ko.efarming.util.Constants;
 
 public class HomeActivity extends BaseActivity {
     public static RectClass rectClass ;
     private FloatingActionButton floatingActionButton;
+    private Fragment fragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +33,10 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void setupDefault() {
-
+        fragment = new ProductListFragment();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment, fragment.getClass().getSimpleName());
+        fragmentTransaction.commit();
     }
 
     private void setupEvent() {

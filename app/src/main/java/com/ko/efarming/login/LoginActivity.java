@@ -2,6 +2,7 @@ package com.ko.efarming.login;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
@@ -226,16 +227,37 @@ public class LoginActivity extends BaseActivity {
                                 efProgressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "Authentication failed ", Toast.LENGTH_LONG).show();
                         } else {
-                            if (efProgressDialog != null)
-                                efProgressDialog.dismiss();
-                            if (getWhetherUserCompletedCompanyProfile()) {
-                                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
-                                finish();
-                            } else {
-                                startActivity(new Intent(LoginActivity.this, CompanyInfoActivity.class));
-                                finish();
-                            }
-                            Toast.makeText(LoginActivity.this, "Logged in successfully", Toast.LENGTH_LONG).show();
+                            DatabaseReference ref = getApp().getFireBaseDataBase().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid());
+                            ref.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    User user = dataSnapshot.getValue(User.class);
+                                    Log.e("Firebase", "user  "+user.email);
+                                    isCompanyProfileUpdated = user.isCompanyProfileUpdated;
+                                    Log.e("Firebase", "isCompanyProfileUpdated "+isCompanyProfileUpdated);
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (efProgressDialog != null)
+                                                efProgressDialog.dismiss();
+                                            if (isCompanyProfileUpdated) {
+                                                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                                                finish();
+                                            } else {
+                                                startActivity(new Intent(LoginActivity.this, CompanyInfoActivity.class));
+                                                finish();
+                                            }
+                                            Toast.makeText(LoginActivity.this, "Logged in successfully", Toast.LENGTH_LONG).show();
+
+                                        }
+                                    },200);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    Log.e("Firebase", "onCancelled", databaseError.toException());
+                                }
+                            });
 
                         }
                     }
@@ -249,6 +271,7 @@ public class LoginActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 isCompanyProfileUpdated = user.isCompanyProfileUpdated;
+                Log.e("Firebase", "isCompanyProfileUpdated "+isCompanyProfileUpdated);
             }
 
             @Override

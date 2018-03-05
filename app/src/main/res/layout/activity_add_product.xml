@@ -6,46 +6,150 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:background="@color/colorPrimary"
-        app:navigationIcon="?homeAsUpIndicator" />
-
     <LinearLayout
+        android:id="@+id/layout"
         android:background="@color/colorPrimary"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
-            android:background="@drawable/iamge_border"
-            android:padding="40dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="25dp"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:drawableTop="@drawable/ic_insert_photo_white_36dp"
-                android:text="@string/add_your_product_photo"
-                android:textColor="@android:color/white"
-                android:textSize="22sp"
-                app:layout_collapseMode="parallax" />
+            <RelativeLayout
+                android:id="@+id/custom_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="48dp">
 
-            <ImageView
-                android:id="@+id/img_cmpny_photo"
+                <ImageView
+                    android:id="@+id/img_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginStart="15dp"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_arrow_back_white_24dp" />
+
+                <TextView
+                    android:id="@+id/txt_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:padding="4dp"
+                    android:text="@string/add_product"
+                    android:textColor="#fff"
+                    android:textSize="20sp"
+                    android:visibility="visible" />
+            </RelativeLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                app:layout_collapseMode="parallax" />
+                android:background="@color/colorPrimary"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
 
-        </FrameLayout>
+                <FrameLayout
+                    android:id="@+id/photo_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:layout_marginTop="25dp"
+                    android:background="@drawable/image_border">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableTop="@drawable/ic_insert_photo_white_36dp"
+                        android:text="@string/add_your_product_photo"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
+
+                    <ImageView
+                        android:id="@+id/img_cmpny_photo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop" />
+
+                </FrameLayout>
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/edt_product_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/enter_your_product_name"
+                    android:imeOptions="actionNext"
+                    android:inputType="text"
+                    android:maxLength="25"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="12sp"
+                    app:backgroundTint="@android:color/white" />
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/edt_product_quantity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/enter_your_product_quantity"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="12sp"
+                    app:backgroundTint="@android:color/white" />
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/edt_product_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/enter_your_product_price"
+                    android:imeOptions="actionDone"
+                    android:inputType="number"
+                    android:maxLength="8"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="12sp"
+                    app:backgroundTint="@android:color/white" />
+
+                <Button
+                    android:id="@+id/submit"
+                    android:layout_width="120dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:background="@drawable/image_border"
+                    android:text="@string/submit"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
     </LinearLayout>
 </com.hendraanggrian.widget.RevealLinearLayout>

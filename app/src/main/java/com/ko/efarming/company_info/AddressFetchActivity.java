@@ -200,6 +200,8 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
             @Override
             public void run() {
                 address = getAddressFromTheMarker(position.latitude, position.longitude);
+                getLat = position.latitude;
+                getLong = position.longitude;
                 if (!TextUtils.isNullOrEmpty(address)) {
                     imgSubmitAddress.setVisibility(View.VISIBLE);
                     txtAddress.setText(address);
@@ -299,6 +301,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     @Override
     public void onFetchedAddress(String address) {
         if (!TextUtils.isEmpty(address)) {
+            this.address = address;
             imgSubmitAddress.setVisibility(View.VISIBLE);
             txtAddress.setText(address);
         } else {

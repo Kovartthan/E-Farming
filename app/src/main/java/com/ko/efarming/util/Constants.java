@@ -9,7 +9,7 @@ import android.Manifest;
 public interface Constants {
     public static String USERS = "users";
     public static String COMPANY_INFO = "company_info";
-    public static String COMPNAY_PROFILE_UPDATED = "compnay_profile_updated";
+    public static String COMPNAY_PROFILE_UPDATED = "isCompanyProfileUpdated";
     String[] PERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE};
     int REQUEST_PERMISSION_READ_STORAGE = 2;
     int REQUEST_PICTURE_FROM_GALLERY = 200;
@@ -27,4 +27,5 @@ public interface Constants {
     String GET_LONGITUDE = "get_longitude";
     String  LOCATION_FETCH_FAILED = "location_fetch_failed";
     String SEND_RECT = "send_rect";
+    public static String PRODUCT_INFO = "product_info";
 }
