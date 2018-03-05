@@ -29,13 +29,15 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
                 android:background="@color/colorPrimary">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="50dp"
+                    android:layout_marginTop="110dp"
+                    android:fitsSystemWindows="true"
                     android:drawableTop="@drawable/ic_location_city_white_18dp"
                     android:text="@string/add_your_company_photo"
                     android:textColor="@android:color/white"
@@ -128,7 +130,7 @@
                     android:id="@+id/cmpany_phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/ic_call_black_18dp"
+                    android:drawableLeft="@drawable/ic_phone_black_24dp"
                     android:drawablePadding="8dp"
                     android:hint="@string/contact_number"
                     android:inputType="phone"

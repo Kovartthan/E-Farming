@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -48,7 +47,6 @@ import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.util.AlertUtils;
 import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.FusedLocationSingleton;
-import com.ko.efarming.util.MarshMallowPermissionUtils;
 import com.ko.efarming.util.TextUtils;
 
 import java.io.IOException;
@@ -62,7 +60,7 @@ import static com.ko.efarming.util.Constants.GET_LONGITUDE;
 import static com.ko.efarming.util.Constants.REQUEST_CHECK_SETTINGS;
 
 public class AddressFetchActivity extends BaseActivity implements OnMapReadyCallback,
-        GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener, OnAddressListener,GoogleApiClient.ConnectionCallbacks,
+        GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener, OnAddressListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
     private GoogleMap mMap;
@@ -83,6 +81,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     private LocationRequest mLocationRequest;
     public final static int FAST_LOCATION_FREQUENCY = 1000;
     public final static int LOCATION_FREQUENCY = 2 * 1000;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
@@ -135,7 +134,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
             public void run() {
                 startLocationUpdates(AddressFetchActivity.this);
             }
-        },200);
+        }, 200);
     }
 
     private void setupEvent() {
@@ -153,7 +152,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                     addressIntent.putExtra(GET_ADDRESS, address);
                     addressIntent.putExtra(GET_LATITUDE, getLat);
                     addressIntent.putExtra(GET_LONGITUDE, getLong);
-                    setResult(RESULT_OK,addressIntent);
+                    setResult(RESULT_OK, addressIntent);
                     finish();
                 } else {
                     Toast.makeText(AddressFetchActivity.this, "No address found", Toast.LENGTH_LONG).show();
@@ -420,8 +419,6 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
 
     /**
      * get last available location
-     *
-     * @return last known location
      */
     @SuppressLint("MissingPermission")
     public Location getLastLocation(Activity activity) {
@@ -439,9 +436,9 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     public void onConnected(Bundle bundle) {
         // do location updates
         requestLocationUpdates();
-        //        if (!isMarkerPlaced) {
-//            getLastKnownLocation();
-//        }
+        if (isMarkerPlaced) {
+            getLastKnownLocation();
+        }
     }
 
     @Override
@@ -467,9 +464,11 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
             Intent intent = new Intent(Constants.INTENT_FILTER_LOCATION_UPDATE);
             intent.putExtra(Constants.LBM_EVENT_LOCATION_UPDATE, location);
             LocalBroadcastManager.getInstance(EFApp.getContext()).sendBroadcast(intent);
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            moveMap(latLng.latitude, latLng.longitude);
-            isMarkerPlaced = true;
+            if(!isMarkerPlaced) {
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                moveMap(latLng.latitude, latLng.longitude);
+                isMarkerPlaced = true;
+            }
         }
     }
 
