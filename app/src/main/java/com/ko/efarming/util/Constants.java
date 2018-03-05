@@ -26,4 +26,5 @@ public interface Constants {
     String GET_LATITUDE = "get_latitude";
     String GET_LONGITUDE = "get_longitude";
     String  LOCATION_FETCH_FAILED = "location_fetch_failed";
+    String SEND_RECT = "send_rect";
 }

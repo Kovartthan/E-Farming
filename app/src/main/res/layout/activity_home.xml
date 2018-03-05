@@ -6,14 +6,14 @@
     android:layout_height="match_parent"
     tools:context="com.ko.efarming.home.HomeActivity">
 
-    <Button
-        android:layout_width="150dp"
-        android:layout_height="70dp"
-        android:background="@android:color/holo_green_dark"
-        android:layout_centerInParent="true"
-        android:textSize="16sp"
-        android:onClick="doLogout"
-        android:textColor="@android:color/white"
-        android:text="Log Out"/>
-
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btn_add_product"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="32dp"
+        android:src="@drawable/ic_add_white_24dp"
+        app:fabSize="normal"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

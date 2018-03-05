@@ -48,4 +48,5 @@
     <string name="err_internet">Please connect to the Internet</string>
     <string name="location_permission_required">Location permission required for this app</string>
     <string name="go_to_settings_enable_location_permission">Go to settings and enable location permission</string>
+    <string name="add_your_product_photo">Add your product photo</string>
 </resources>
