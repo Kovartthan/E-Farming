@@ -34,7 +34,7 @@ public class AddProductActivity extends AppCompatActivity {
     private void init() {
         revealLayout = findViewById(R.id.revealLayout);
         toolbar = findViewById(R.id.toolbar);
-        layout = findViewById(R.id.layout);
+//        layout = findViewById(R.id.layout);
         rect = (RectClass) getIntent().getSerializableExtra(Constants.SEND_RECT);
     }
 
