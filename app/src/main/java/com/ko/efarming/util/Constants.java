@@ -28,4 +28,5 @@ public interface Constants {
     String  LOCATION_FETCH_FAILED = "location_fetch_failed";
     String SEND_RECT = "send_rect";
     public static String PRODUCT_INFO = "product_info";
+    public  int REFRESH_PRODUCT = 1100;
 }

@@ -9,6 +9,9 @@ public class ProductInfo {
     public String productQuantity;
     public String productPrice;
     public String imageUrl;
+    public ProductInfo(){
+
+    }
     public ProductInfo(String productName, String productQuantity, String productPrice,String imageUrl) {
         this.productName = productName;
         this.productQuantity = productQuantity;

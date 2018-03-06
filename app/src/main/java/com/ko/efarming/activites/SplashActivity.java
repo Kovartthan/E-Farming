@@ -14,7 +14,7 @@ import android.view.WindowManager;
 import com.ko.efarming.EFApp;
 import com.ko.efarming.R;
 import com.ko.efarming.company_info.CompanyInfoActivity;
-import com.ko.efarming.home.HomeActivity;
+import com.ko.efarming.home.activities.HomeActivity;
 import com.ko.efarming.login.LoginActivity;
 
 public class SplashActivity extends AppCompatActivity {

@@ -1,4 +1,4 @@
-package com.ko.efarming.home;
+package com.ko.efarming.home.activities;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -12,14 +12,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -41,17 +39,13 @@ import com.google.firebase.storage.OnPausedListener;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.hendraanggrian.kota.content.Themes;
 import com.hendraanggrian.reveallayout.Radius;
 import com.hendraanggrian.reveallayout.RevealableLayout;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
-import com.ko.efarming.login.SignUpActivity;
 import com.ko.efarming.model.CompanyInfo;
-import com.ko.efarming.model.CompanyInfoPublic;
 import com.ko.efarming.model.ProductInfo;
 import com.ko.efarming.model.RectClass;
-import com.ko.efarming.model.User;
 import com.ko.efarming.util.AlertUtils;
 import com.ko.efarming.util.CameraUtils;
 import com.ko.efarming.util.CompressImage;
@@ -69,7 +63,6 @@ import static com.ko.efarming.util.Constants.REQUEST_PERMISSION_READ_STORAGE;
 import static com.ko.efarming.util.Constants.REQUEST_PICTURE_FROM_CAMERA;
 import static com.ko.efarming.util.Constants.REQUEST_PICTURE_FROM_GALLERY;
 import static com.ko.efarming.util.DeviceUtils.hideSoftKeyboard;
-import static com.ko.efarming.util.TextUtils.isValidEmail;
 
 public class AddProductActivity extends BaseActivity {
     private RectClass rect;
@@ -371,17 +364,9 @@ public class AddProductActivity extends BaseActivity {
         if (efProgressDialog != null)
             efProgressDialog.show();
 
-        addProductInfoToPublic();
         addProductInfoToUsersDatabase();
 
-        efProgressDialog.dismiss();
 
-        if(isAddedDbPrivate && isAddedDbPublic){
-            Toast.makeText(AddProductActivity.this,"Product added successfully",Toast.LENGTH_LONG).show();
-            finish();
-        }else{
-            Toast.makeText(AddProductActivity.this,"Product not added, please try again",Toast.LENGTH_LONG).show();
-        }
 
     }
 
@@ -390,7 +375,6 @@ public class AddProductActivity extends BaseActivity {
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.PRODUCT_INFO)
-                .child(getCompanyName())
                 .child(edtProductName.getText().toString())
                 .setValue(productInfo)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -432,6 +416,15 @@ public class AddProductActivity extends BaseActivity {
 
                             } else {
                             }
+                            efProgressDialog.dismiss();
+                            if(isAddedDbPrivate && isAddedDbPublic){
+                                Toast.makeText(AddProductActivity.this,"Product added successfully",Toast.LENGTH_LONG).show();
+                                setResult(RESULT_OK);
+                                finish();
+                            }else{
+                                Toast.makeText(AddProductActivity.this,"Product not added, please try again",Toast.LENGTH_LONG).show();
+                            }
+
                         } else {
                             isAddedDbPublic = false;
                         }
@@ -447,6 +440,7 @@ public class AddProductActivity extends BaseActivity {
                 .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
                 .child(Constants.COMPANY_INFO)
                 .child(Constants.PRODUCT_INFO)
+                .child(edtProductName.getText().toString())
                 .setValue(productInfo)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -487,6 +481,7 @@ public class AddProductActivity extends BaseActivity {
 
                             } else {
                             }
+                            addProductInfoToPublic();
                         } else {
                             isAddedDbPrivate = false;
                         }

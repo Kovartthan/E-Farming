@@ -32,7 +32,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
-import com.ko.efarming.home.HomeActivity;
+import com.ko.efarming.home.activities.HomeActivity;
 import com.ko.efarming.model.CompanyInfo;
 import com.ko.efarming.model.CompanyInfoPublic;
 import com.ko.efarming.util.AlertUtils;
@@ -345,7 +345,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
             efProgressDialog.show();
 
         addCompanyInfoToUsersDatabase();
-        redirectToHomeScreen();
+
     }
 
     private void addCompanyInfoToPublic() {
@@ -360,6 +360,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             isAddedDbPublic = true;
+                            redirectToHomeScreen();
                         } else {
                             isAddedDbPublic = false;
                         }

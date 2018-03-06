@@ -49,8 +49,9 @@
     <string name="location_permission_required">Location permission required for this app</string>
     <string name="go_to_settings_enable_location_permission">Go to settings and enable location permission</string>
     <string name="add_your_product_photo">Add your product photo</string>
-    <string name="enter_your_product_name">Enter your product name</string>
-    <string name="enter_your_product_quantity">Enter your product quantity</string>
-    <string name="enter_your_product_price">Enter your product price [INR]</string>
+    <string name="enter_your_product_name">Product name</string>
+    <string name="enter_your_product_quantity">Product quantity</string>
+    <string name="enter_your_product_price">Product price [INR]</string>
     <string name="add_product">Add Product</string>
+    <string name="no_image_available">No Image Available</string>
 </resources>

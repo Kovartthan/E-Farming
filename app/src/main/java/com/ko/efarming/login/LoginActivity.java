@@ -33,7 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.company_info.CompanyInfoActivity;
-import com.ko.efarming.home.HomeActivity;
+import com.ko.efarming.home.activities.HomeActivity;
 import com.ko.efarming.model.User;
 import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
