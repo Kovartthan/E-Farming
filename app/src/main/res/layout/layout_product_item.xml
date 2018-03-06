@@ -12,20 +12,20 @@
         android:orientation="vertical">
 
         <FrameLayout
-            android:background="@android:color/darker_gray"
             android:layout_width="match_parent"
-            android:layout_height="150dp">
+            android:layout_height="150dp"
+            android:background="@color/background_grey">
 
             <TextView
-                android:text="@string/no_image_available"
-                android:drawableTop="@drawable/ic_photo_green_24dp"
-                android:drawablePadding="5dp"
-                android:gravity="center_horizontal"
-                android:textSize="20sp"
-                android:textColor="@color/colorPrimary"
-                android:layout_gravity="center"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:drawablePadding="5dp"
+                android:drawableTop="@drawable/ic_photo_green_24dp"
+                android:gravity="center_horizontal"
+                android:text="@string/no_image_available"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp" />
 
             <ImageView
                 android:id="@+id/img_product"
@@ -34,12 +34,6 @@
                 android:scaleType="centerCrop" />
 
         </FrameLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray" />
-
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -53,8 +47,9 @@
                 android:layout_toLeftOf="@+id/txt_product_price"
                 android:ellipsize="end"
                 android:singleLine="true"
+                android:text="Super"
                 android:textColor="@color/colorPrimary"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/txt_product_price"
@@ -66,20 +61,70 @@
                 android:singleLine="true"
                 android:text="Rs 599"
                 android:textColor="@color/colorPrimary"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
         </RelativeLayout>
 
         <TextView
             android:id="@+id/txt_product_quantity"
-            android:padding="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/txt_product_price"
             android:ellipsize="end"
+            android:padding="10dp"
             android:paddingTop="10dp"
             android:singleLine="true"
+            android:text="Available units : 2"
             android:textColor="@color/colorPrimary"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/holo_green_dark"
+                android:gravity="center"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/txt_edit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_mode_edit_white_18dp"
+                    android:drawablePadding="10dp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Edit"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/holo_red_dark"
+                android:gravity="center"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/txt_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_delete_white_18dp"
+                    android:drawablePadding="10dp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Delete"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
 

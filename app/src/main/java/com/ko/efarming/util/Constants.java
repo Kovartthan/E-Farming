@@ -29,4 +29,5 @@ public interface Constants {
     String SEND_RECT = "send_rect";
     public static String PRODUCT_INFO = "product_info";
     public  int REFRESH_PRODUCT = 1100;
+    String EDIT_PRODUCT = "edit_product";
 }

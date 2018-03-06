@@ -17,8 +17,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ko.efarming.R;
+import com.ko.efarming.home.OnEditOrDeleteProductListener;
+import com.ko.efarming.home.activities.AddProductActivity;
 import com.ko.efarming.home.adapters.ProductListAdapter;
 import com.ko.efarming.model.ProductInfo;
+import com.ko.efarming.model.RectClass;
 import com.ko.efarming.util.Constants;
 
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ import static com.ko.efarming.EFApp.getApp;
 import static com.ko.efarming.util.Constants.REFRESH_PRODUCT;
 
 
-public class ProductListFragment extends Fragment {
+public class ProductListFragment extends Fragment implements OnEditOrDeleteProductListener{
     private RecyclerView recyclerView;
     private ArrayList<ProductInfo> productInfoArrayList;
     private ProductListAdapter productListAdapter;
@@ -60,6 +63,7 @@ public class ProductListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         productInfoArrayList = new ArrayList<>();
         productListAdapter = new ProductListAdapter(getActivity(),productInfoArrayList);
+        productListAdapter.setOnEditOrDeleteProductListener(this);
         recyclerView.setAdapter(productListAdapter);
     }
 
@@ -69,7 +73,6 @@ public class ProductListFragment extends Fragment {
     }
 
     private void getProductListFromDataBase() {
-        productInfoArrayList = new ArrayList<>();
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)
@@ -78,6 +81,7 @@ public class ProductListFragment extends Fragment {
                 .child(Constants.PRODUCT_INFO).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                productInfoArrayList = new ArrayList<>();
                 if(dataSnapshot != null) {
                     for(DataSnapshot snapshot: dataSnapshot.getChildren()){
                         ProductInfo productInfo = snapshot.getValue(ProductInfo.class);
@@ -100,5 +104,24 @@ public class ProductListFragment extends Fragment {
 
     private void setupEvent() {
 
+    }
+
+    @Override
+    public void onEditOrDeleteProduct(boolean isEdit, ProductInfo productInfo) {
+        if(isEdit){
+            doEditProduct(productInfo);
+        }else{
+            doDeleteProduct(productInfo);
+        }
+    }
+
+    private void doDeleteProduct(ProductInfo productInfo) {
+
+    }
+
+    private void doEditProduct(ProductInfo productInfo) {
+        Intent intent = new Intent(getActivity(), AddProductActivity.class);
+        intent.putExtra(Constants.EDIT_PRODUCT,productInfo);
+        startActivity(intent);
     }
 }

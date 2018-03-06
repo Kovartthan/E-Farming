@@ -5,4 +5,5 @@
     <color name="colorAccent">#006256</color>
     <color name="transparent_home_white">#80ffffff</color>
     <color name="transparent_white_bg">#51edd46d</color>
+    <color name="background_grey">#51c6f7b6</color>
 </resources>

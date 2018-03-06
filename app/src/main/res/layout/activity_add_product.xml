@@ -68,6 +68,7 @@
                     android:background="@drawable/image_border">
 
                     <TextView
+                        android:id="@+id/txt_img_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
