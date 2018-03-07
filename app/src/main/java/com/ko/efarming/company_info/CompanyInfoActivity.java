@@ -382,7 +382,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                             isAddedDbPrivate = true;
                             Uri mImageUri = Uri.fromFile(new File(imagePathForFireBase));
                             if (!TextUtils.isEmpty(imagePathForFireBase)) {
-                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("company_photo").child(imagePathForFireBase);
+                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("company_photo");
                                 filepath.putFile(mImageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
@@ -407,6 +407,10 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                                         Uri downloadUri = taskSnapshot.getDownloadUrl();
                                         if (downloadUri != null) {
                                             imagerls = downloadUri.toString();
+                                            FirebaseDatabase.getInstance()
+                                                    .getReference(Constants.USERS)
+                                                    .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
+                                                    .child(Constants.COMPANY_INFO).child("imageUrl").setValue(imagerls);
                                         }
 //                                        redirectToHomeScreen();
                                     }

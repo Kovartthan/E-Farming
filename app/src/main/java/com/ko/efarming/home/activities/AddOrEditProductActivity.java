@@ -65,7 +65,7 @@ import static com.ko.efarming.util.Constants.REQUEST_PICTURE_FROM_CAMERA;
 import static com.ko.efarming.util.Constants.REQUEST_PICTURE_FROM_GALLERY;
 import static com.ko.efarming.util.DeviceUtils.hideSoftKeyboard;
 
-public class AddProductActivity extends BaseActivity {
+public class AddOrEditProductActivity extends BaseActivity {
     private RectClass rect;
     private RevealableLayout revealLayout;
     private Toolbar toolbar;
@@ -143,7 +143,7 @@ public class AddProductActivity extends BaseActivity {
         edtProductQuantity = findViewById(R.id.edt_product_quantity);
         edtProductPrice = findViewById(R.id.edt_product_price);
         btnAdd = findViewById(R.id.submit);
-        cameraUtils = new CameraUtils(this, AddProductActivity.this);
+        cameraUtils = new CameraUtils(this, AddOrEditProductActivity.this);
     }
 
     private void setupDefault() {
@@ -240,7 +240,7 @@ public class AddProductActivity extends BaseActivity {
         findViewById(R.id.photo_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DeviceUtils.hideSoftKeyboard(AddProductActivity.this, view);
+                DeviceUtils.hideSoftKeyboard(AddOrEditProductActivity.this, view);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (cameraUtils.checkAndRequestCameraPermissions()) {
                         cameraUtils.promptMediaOption();
@@ -396,6 +396,7 @@ public class AddProductActivity extends BaseActivity {
 
         if (efProgressDialog != null)
             efProgressDialog.show();
+
         if (isEdit)
             updateProductInfoOnDb();
         else
@@ -404,7 +405,7 @@ public class AddProductActivity extends BaseActivity {
 
     }
 
-    private void addProductInfoToPublic(String key) {
+    private void addProductInfoToPublic(final String key) {
         ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key);
         FirebaseDatabase.getInstance()
                 .getReference()
@@ -418,7 +419,7 @@ public class AddProductActivity extends BaseActivity {
                             isAddedDbPublic = true;
                             Uri mImageUri = Uri.fromFile(new File(imagePathForFireBase));
                             if (!TextUtils.isEmpty(imagePathForFireBase)) {
-                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("company_photo").child(imagePathForFireBase);
+                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("product_photo").child(imagePathForFireBase);
                                 filepath.putFile(mImageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
@@ -443,6 +444,10 @@ public class AddProductActivity extends BaseActivity {
                                         Uri downloadUri = taskSnapshot.getDownloadUrl();
                                         if (downloadUri != null) {
                                             imagerls = downloadUri.toString();
+                                            FirebaseDatabase.getInstance()
+                                                    .getReference()
+                                                    .child(Constants.PRODUCT_INFO)
+                                                    .child(key).child("imageUrl").setValue(imagerls);
                                         }
                                     }
 
@@ -452,11 +457,11 @@ public class AddProductActivity extends BaseActivity {
                             }
                             efProgressDialog.dismiss();
                             if (isAddedDbPrivate && isAddedDbPublic) {
-                                Toast.makeText(AddProductActivity.this, "Product added successfully", Toast.LENGTH_LONG).show();
+                                Toast.makeText(AddOrEditProductActivity.this, "Product added successfully", Toast.LENGTH_LONG).show();
                                 setResult(RESULT_OK);
                                 finish();
                             } else {
-                                Toast.makeText(AddProductActivity.this, "Product not added, please try again", Toast.LENGTH_LONG).show();
+                                Toast.makeText(AddOrEditProductActivity.this, "Product not added, please try again", Toast.LENGTH_LONG).show();
                             }
 
                         } else {
@@ -489,7 +494,7 @@ public class AddProductActivity extends BaseActivity {
                             isAddedDbPrivate = true;
                             Uri mImageUri = Uri.fromFile(new File(imagePathForFireBase));
                             if (!TextUtils.isEmpty(imagePathForFireBase)) {
-                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("company_photo").child(imagePathForFireBase);
+                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("product_photo");
                                 filepath.putFile(mImageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
@@ -514,6 +519,13 @@ public class AddProductActivity extends BaseActivity {
                                         Uri downloadUri = taskSnapshot.getDownloadUrl();
                                         if (downloadUri != null) {
                                             imagerls = downloadUri.toString();
+                                            FirebaseDatabase.getInstance()
+                                                    .getReference()
+                                                    .child(Constants.USERS)
+                                                    .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
+                                                    .child(Constants.COMPANY_INFO)
+                                                    .child(Constants.PRODUCT_INFO)
+                                                    .child(key).child("imageUrl").setValue(imagerls);
                                         }
                                     }
 
@@ -562,9 +574,11 @@ public class AddProductActivity extends BaseActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             isAddedDbPrivate = true;
+
                             Uri mImageUri = Uri.fromFile(new File(imagePathForFireBase));
+
                             if (!TextUtils.isEmpty(imagePathForFireBase)) {
-                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("company_photo").child(imagePathForFireBase);
+                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("product_photo").child(imagePathForFireBase);
                                 filepath.putFile(mImageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
@@ -589,6 +603,13 @@ public class AddProductActivity extends BaseActivity {
                                         Uri downloadUri = taskSnapshot.getDownloadUrl();
                                         if (downloadUri != null) {
                                             imagerls = downloadUri.toString();
+                                            FirebaseDatabase.getInstance()
+                                                    .getReference()
+                                                    .child(Constants.USERS)
+                                                    .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
+                                                    .child(Constants.COMPANY_INFO)
+                                                    .child(Constants.PRODUCT_INFO)
+                                                    .child(editProductInfo.productID).child("imageUrl").setValue(imagerls);
                                         }
                                     }
 
@@ -604,7 +625,7 @@ public class AddProductActivity extends BaseActivity {
                 });
     }
 
-    private void updateProductInfoToPublic(String key) {
+    private void updateProductInfoToPublic(final String key) {
         ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key);
         FirebaseDatabase.getInstance()
                 .getReference()
@@ -618,7 +639,7 @@ public class AddProductActivity extends BaseActivity {
                             isAddedDbPublic = true;
                             Uri mImageUri = Uri.fromFile(new File(imagePathForFireBase));
                             if (!TextUtils.isEmpty(imagePathForFireBase)) {
-                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("company_photo").child(imagePathForFireBase);
+                                StorageReference filepath = getApp().getFireBaseStorage().getReference().child("product_photo").child(imagePathForFireBase);
                                 filepath.putFile(mImageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
@@ -643,6 +664,10 @@ public class AddProductActivity extends BaseActivity {
                                         Uri downloadUri = taskSnapshot.getDownloadUrl();
                                         if (downloadUri != null) {
                                             imagerls = downloadUri.toString();
+                                            FirebaseDatabase.getInstance()
+                                                    .getReference()
+                                                    .child(Constants.PRODUCT_INFO)
+                                                    .child(key).child("imageUrl").setValue(imagerls);
                                         }
                                     }
 
@@ -652,11 +677,11 @@ public class AddProductActivity extends BaseActivity {
                             }
                             efProgressDialog.dismiss();
                             if (isAddedDbPrivate && isAddedDbPublic) {
-                                Toast.makeText(AddProductActivity.this, "Product added successfully", Toast.LENGTH_LONG).show();
+                                Toast.makeText(AddOrEditProductActivity.this, "Product edited successfully", Toast.LENGTH_LONG).show();
                                 setResult(RESULT_OK);
                                 finish();
                             } else {
-                                Toast.makeText(AddProductActivity.this, "Product not added, please try again", Toast.LENGTH_LONG).show();
+                                Toast.makeText(AddOrEditProductActivity.this, "Product not edited, please try again", Toast.LENGTH_LONG).show();
                             }
 
                         } else {

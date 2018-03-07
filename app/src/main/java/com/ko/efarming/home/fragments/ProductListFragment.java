@@ -1,6 +1,7 @@
 package com.ko.efarming.home.fragments;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,10 +19,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ko.efarming.R;
 import com.ko.efarming.home.OnEditOrDeleteProductListener;
-import com.ko.efarming.home.activities.AddProductActivity;
+import com.ko.efarming.home.activities.AddOrEditProductActivity;
 import com.ko.efarming.home.adapters.ProductListAdapter;
 import com.ko.efarming.model.ProductInfo;
-import com.ko.efarming.model.RectClass;
+import com.ko.efarming.util.AlertUtils;
 import com.ko.efarming.util.Constants;
 
 import java.util.ArrayList;
@@ -115,12 +116,34 @@ public class ProductListFragment extends Fragment implements OnEditOrDeleteProdu
         }
     }
 
-    private void doDeleteProduct(ProductInfo productInfo) {
+    private void doDeleteProduct(final ProductInfo productInfo) {
+        AlertUtils.showAlert(getActivity(),getString(R.string.app_name),"Are you sure you want to delete this product", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                FirebaseDatabase.getInstance()
+                        .getReference()
+                        .child(Constants.USERS)
+                        .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
+                        .child(Constants.COMPANY_INFO)
+                        .child(Constants.PRODUCT_INFO)
+                        .child(productInfo.productID).removeValue();
+                FirebaseDatabase.getInstance()
+                        .getReference()
+                        .child(Constants.PRODUCT_INFO)
+                        .child(productInfo.productID).removeValue();
+            }
+        }, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        },false);
 
     }
 
     private void doEditProduct(ProductInfo productInfo) {
-        Intent intent = new Intent(getActivity(), AddProductActivity.class);
+        Intent intent = new Intent(getActivity(), AddOrEditProductActivity.class);
         intent.putExtra(Constants.EDIT_PRODUCT,productInfo);
         startActivity(intent);
     }

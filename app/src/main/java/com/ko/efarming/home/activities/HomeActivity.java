@@ -74,7 +74,7 @@ public class HomeActivity extends BaseActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(HomeActivity.this, AddProductActivity.class);
+                Intent intent = new Intent(HomeActivity.this, AddOrEditProductActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 rectClass = new RectClass(findViewById(R.id.btn_add_product));
                 intent.putExtra(Constants.SEND_RECT, rectClass);
