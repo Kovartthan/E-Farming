@@ -46,6 +46,7 @@ import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.model.CompanyInfo;
 import com.ko.efarming.model.ProductInfo;
 import com.ko.efarming.model.RectClass;
+import com.ko.efarming.model.User;
 import com.ko.efarming.util.AlertUtils;
 import com.ko.efarming.util.CameraUtils;
 import com.ko.efarming.util.CompressImage;
@@ -87,6 +88,8 @@ public class AddOrEditProductActivity extends BaseActivity {
     private String productName = "";
     private boolean isEdit;
     private String productKey;
+    private CompanyInfo companyInfo;
+    private User userDetails = null;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -151,7 +154,20 @@ public class AddOrEditProductActivity extends BaseActivity {
         if (!isEdit) {
             doRevealAction();
         }
+        loadCompanyData();
     }
+
+    private void loadCompanyData() {
+
+        if (efProgressDialog != null)
+            efProgressDialog.show();
+
+        getCompanyName();
+
+    }
+
+
+
 
     private void getIntentData() {
         if (getIntent() != null && getIntent().hasExtra(Constants.SEND_RECT)) {
@@ -455,20 +471,53 @@ public class AddOrEditProductActivity extends BaseActivity {
 
                             } else {
                             }
-                            efProgressDialog.dismiss();
-                            if (isAddedDbPrivate && isAddedDbPublic) {
-                                Toast.makeText(AddOrEditProductActivity.this, "Product added successfully", Toast.LENGTH_LONG).show();
-                                setResult(RESULT_OK);
-                                finish();
-                            } else {
-                                Toast.makeText(AddOrEditProductActivity.this, "Product not added, please try again", Toast.LENGTH_LONG).show();
-                            }
+                            addCompanyInfoIntoProduct(key);
 
                         } else {
                             isAddedDbPublic = false;
                         }
                     }
                 });
+    }
+
+    private void addCompanyInfoIntoProduct(final String key) {
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.PRODUCT_INFO)
+                .child(key).child(Constants.COMPANY_INFO).setValue(companyInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful())
+                {
+                    addUserInfoForChatInDb(key);
+
+                }else{
+                    Toast.makeText(AddOrEditProductActivity.this, "Product not added, please try again", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private void addUserInfoForChatInDb(String key) {
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.PRODUCT_INFO)
+                .child(key).child(Constants.USERS_INFO).setValue(userDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    efProgressDialog.dismiss();
+                    if (isAddedDbPrivate && isAddedDbPublic) {
+                        Toast.makeText(AddOrEditProductActivity.this, "Product added successfully", Toast.LENGTH_LONG).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    }
+                }else{
+                    Toast.makeText(AddOrEditProductActivity.this, "Product not added, please try again", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
     }
 
     private void addProductInfoToUsersDatabase() {
@@ -541,23 +590,26 @@ public class AddOrEditProductActivity extends BaseActivity {
                 });
     }
 
-    private String getCompanyName() {
-        final String[] companyName = new String[1];
+    private void getCompanyName() {
         DatabaseReference ref = getApp().getFireBaseDataBase().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid()).child(Constants.COMPANY_INFO);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                CompanyInfo companyInfo = dataSnapshot.getValue(CompanyInfo.class);
-                companyName[0] = companyInfo.name;
+                efProgressDialog.dismiss();
+                companyInfo = dataSnapshot.getValue(CompanyInfo.class);
+                getUserInfo();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("Firebase", "onCancelled", databaseError.toException());
+                efProgressDialog.dismiss();
+                exitRevealAction();
+                Toast.makeText(AddOrEditProductActivity.this,"Cant connect to Database, please try again ",Toast.LENGTH_LONG).show();
             }
         });
-        return companyName[0];
     }
+
+
 
     private void updateProductInfoOnDb() {
         ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, editProductInfo.productID);
@@ -675,6 +727,10 @@ public class AddOrEditProductActivity extends BaseActivity {
 
                             } else {
                             }
+                            FirebaseDatabase.getInstance()
+                                    .getReference()
+                                    .child(Constants.PRODUCT_INFO)
+                                    .child(key).child(Constants.COMPANY_INFO).setValue(companyInfo);
                             efProgressDialog.dismiss();
                             if (isAddedDbPrivate && isAddedDbPublic) {
                                 Toast.makeText(AddOrEditProductActivity.this, "Product edited successfully", Toast.LENGTH_LONG).show();
@@ -689,6 +745,24 @@ public class AddOrEditProductActivity extends BaseActivity {
                         }
                     }
                 });
+    }
+
+    private void getUserInfo() {
+        DatabaseReference ref = getApp().getFireBaseDataBase().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid());
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                efProgressDialog.dismiss();
+                userDetails = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                efProgressDialog.dismiss();
+                exitRevealAction();
+                Toast.makeText(AddOrEditProductActivity.this,"Cant connect to Database, please try again ",Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 }

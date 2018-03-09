@@ -30,4 +30,5 @@ public interface Constants {
     public static String PRODUCT_INFO = "product_info";
     public  int REFRESH_PRODUCT = 1100;
     String EDIT_PRODUCT = "edit_product";
+    public static String USERS_INFO = "user_info";
 }
