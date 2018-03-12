@@ -1,6 +1,9 @@
 package com.ko.efarming.login;
 
+import android.app.KeyguardManager;
 import android.content.Intent;
+import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -34,9 +37,13 @@ import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.company_info.CompanyInfoActivity;
 import com.ko.efarming.home.activities.HomeActivity;
+import com.ko.efarming.login.fingerprint.FingerPrintUtils;
+import com.ko.efarming.login.fingerprint.FingerprintHandler;
 import com.ko.efarming.model.User;
 import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
+
+import javax.crypto.Cipher;
 
 import static com.ko.efarming.util.DeviceUtils.hideSoftKeyboard;
 import static com.ko.efarming.util.TextUtils.isValidEmail;
@@ -50,6 +57,13 @@ public class LoginActivity extends BaseActivity {
     private TextInputLayout passwordLayout;
     private boolean isCompanyProfileUpdated = false;
     private ValueEventListener valueEventListener = null;
+    private static final String FINGERPRINT_KEY = "key_name";
+    private Cipher cipher;
+    private FingerprintManager.CryptoObject cryptoObject;
+    private FingerPrintUtils fingerPrintUtils;
+    private FingerprintHandler fingerprintHandler;
+    private FingerprintManager fingerprintManager;
+    private KeyguardManager keyguardManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,12 +88,24 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void init() {
+
         mEmailView = findViewById(R.id.email);
         mPasswordView = findViewById(R.id.password);
         mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         txtSignUp = findViewById(R.id.txt_sign_up);
         emailLayout = findViewById(R.id.email_layout);
         passwordLayout = findViewById(R.id.password_layout);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
+            keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            fingerPrintUtils = new FingerPrintUtils(this,this,fingerprintManager,keyguardManager);
+            fingerprintHandler = new FingerprintHandler(this);
+            cipher = fingerPrintUtils.instantiateCipher();
+            if(cipher != null){
+                    cryptoObject = new FingerprintManager.CryptoObject(cipher);
+            }
+        }
+
     }
 
     private void setupDefault() {

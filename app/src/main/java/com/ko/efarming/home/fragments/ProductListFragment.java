@@ -97,6 +97,7 @@ public class ProductListFragment extends Fragment implements OnEditOrDeleteProdu
                 Log.e("TAG","onCancelled"+databaseError);
             }
         });
+
         for(ProductInfo productInfo :productInfoArrayList){
             Log.e("TAG",""+productInfo.productName);
         }

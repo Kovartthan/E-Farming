@@ -26,6 +26,7 @@ import com.ko.efarming.model.User;
 import com.ko.efarming.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import static com.ko.efarming.EFApp.getApp;
 
@@ -36,7 +37,7 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
     private ChatListAdapter chatListAdapter;
     private String receiverID;
     private boolean isPause;
-
+    private ArrayList<ProductInfo> productInfoArrayList;
     public ChatListFragment() {
 
     }
@@ -57,13 +58,50 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
         chatListAdapter = new ChatListAdapter(getActivity(), chatList);
         chatListAdapter.setOnChatOpenListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(chatListAdapter);
 
     }
 
     private void setupDefault() {
-        getChatsList();
+        getProductInfo();
+
+    }
+
+    private void getProductInfo() {
+        final DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                .getReference().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid());
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren()){;
+                    databaseReference.child(snapshot.getValue().toString()).child("all_chats").addValueEventListener(new ValueEventListener() {
+                        ProductInfo productInfo;
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                    if (snapshot1.getKey().equals("detail_info")) {
+                                        productInfo = snapshot1.getValue(ProductInfo.class);
+                                    }
+                                }
+                                getChatUserInfo(snapshot.getKey(), productInfo);
+                            }
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
 
@@ -77,12 +115,12 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    for(DataSnapshot snapshot1 : snapshot.getChildren()) {
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                         if (snapshot1.getKey().equals("detail_info")) {
                             productInfo = snapshot1.getValue(ProductInfo.class);
                         }
                     }
-                    getChatUserInfo(snapshot.getKey(),productInfo);
+                    getChatUserInfo(snapshot.getKey(), productInfo);
                 }
             }
 
@@ -94,13 +132,13 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
 
     }
 
-    private void getChatUserInfo(final String key,final ProductInfo productInfo){
+    private void getChatUserInfo(final String key, final ProductInfo productInfo) {
         FirebaseDatabase.getInstance()
                 .getReference().child("client_users").child(key).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
-                chatList.add(new ProductBean(key, user ,productInfo));
+                chatList.add(new ProductBean(key, user, productInfo));
                 chatListAdapter.notifyDataSetChanged();
             }
 
@@ -117,8 +155,8 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
     }
 
     @Override
-    public void openChat(String key, ProductInfo productInfo,User user) {
-        startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("Product_id", productInfo).putExtra("receiver", key).putExtra("user",user));
+    public void openChat(String key, ProductInfo productInfo, User user) {
+        startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("Product_id", productInfo).putExtra("receiver", key).putExtra("user", user));
     }
 
     @Override
@@ -127,7 +165,8 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
         if (isPause) {
             chatList = new ArrayList<>();
             chatListAdapter.updateList(chatList);
-            getChatsList();
+//            getChatsList();
+            getProductInfo();
             isPause = true;
         }
     }

@@ -130,7 +130,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Tex
                     receiverUid = user.uid;
                     receiverFirebaseToken = user.firebaseToken;
                     mChatPresenter.getMessage(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                            receiverUid, productInfo.productID);
+                            receiverUid, productInfo);
                 }
             }
 

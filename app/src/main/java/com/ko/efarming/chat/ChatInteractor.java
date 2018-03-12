@@ -37,7 +37,7 @@ public class ChatInteractor implements ChatContract.Interactor {
     }
 
     @Override
-    public void sendMessageToFirebaseUser(final Context context, final Chat chat, final String receiverFirebaseToken, ProductInfo productInfo) {
+    public void sendMessageToFirebaseUser(final Context context, final Chat chat, final String receiverFirebaseToken, final ProductInfo productInfo) {
 //        final String room_type_1 = chat.senderUid + "_" + chat.receiverUid;
         final String room_type_2 = chat.receiverUid + "_" + chat.senderUid;
 
@@ -45,7 +45,7 @@ public class ChatInteractor implements ChatContract.Interactor {
                 .getReference().child(Constants.PRODUCT_INFO).child(productInfo.productID).child("all_chats").child(chat.receiverUid);
 
         final  DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference().child(Constants.USERS).child(chat.senderUid).child("all_chats").child(chat.receiverUid);
+                .getReference().child(Constants.USERS).child(productInfo.productID).child(chat.senderUid).child("all_chats").child(chat.receiverUid);
 
         databaseReference.getRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -60,7 +60,7 @@ public class ChatInteractor implements ChatContract.Interactor {
                     Log.e(TAG, "sendMessageToFirebaseUser: success");
 //                    databaseReference.child(room_type_1).child(String.valueOf(chat.timestamp)).setValue(chat);
                     databaseReference.child(room_type_2).child(String.valueOf(chat.timestamp)).setValue(chat);
-                    getMessageFromFirebaseUser(chat.senderUid, chat.receiverUid,chat.receiver);
+                    getMessageFromFirebaseUser(chat.senderUid, chat.receiverUid,productInfo);
                 }
                 // send push notification to the receiver
 //                sendPushNotificationToReceiver(chat.sender,
@@ -117,12 +117,12 @@ public class ChatInteractor implements ChatContract.Interactor {
 //    }
 
     @Override
-    public void getMessageFromFirebaseUser(final String senderUid, final String receiverUid, final String receiver) {
+    public void getMessageFromFirebaseUser(final String senderUid, final String receiverUid, final ProductInfo receiver) {
         final String room_type_1 = senderUid + "_" + receiverUid;
         final String room_type_2 = receiverUid + "_" + senderUid;
 
         final  DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference().child(Constants.USERS).child(senderUid).child("all_chats").child(receiverUid);
+                .getReference().child(Constants.USERS).child(receiver.productID).child(senderUid).child("all_chats").child(receiverUid);
 
         databaseReference.getRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
