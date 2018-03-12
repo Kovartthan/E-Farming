@@ -1,10 +1,12 @@
 package com.ko.efarming.model;
 
+import java.io.Serializable;
+
 /**
  * Created by admin on 3/2/2018.
  */
 
-public class CompanyInfo {
+public class CompanyInfo implements Serializable{
     public String name;
     public String email;
     public String phone;

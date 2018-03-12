@@ -49,7 +49,7 @@ public class LoginActivity extends BaseActivity {
     private TextInputLayout emailLayout;
     private TextInputLayout passwordLayout;
     private boolean isCompanyProfileUpdated = false;
-
+    private ValueEventListener valueEventListener = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +63,7 @@ public class LoginActivity extends BaseActivity {
     private void checkWhetherUserLoggedIn() {
         if (getApp().getFireBaseAuth().getCurrentUser() != null) {
             if (getWhetherUserCompletedCompanyProfile()) {
+                getApp().getAppPreference().setCheckRedirect(1);
                 startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                 finish();
             } else {
@@ -227,8 +228,8 @@ public class LoginActivity extends BaseActivity {
                                 efProgressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "Authentication failed ", Toast.LENGTH_LONG).show();
                         } else {
-                            DatabaseReference ref = getApp().getFireBaseDataBase().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid());
-                            ref.addValueEventListener(new ValueEventListener() {
+                            final DatabaseReference ref = getApp().getFireBaseDataBase().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid());
+                            valueEventListener = new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     User user = dataSnapshot.getValue(User.class);
@@ -241,6 +242,7 @@ public class LoginActivity extends BaseActivity {
                                             if (efProgressDialog != null)
                                                 efProgressDialog.dismiss();
                                             if (isCompanyProfileUpdated) {
+                                                getApp().getAppPreference().setCheckRedirect(1);
                                                 startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                                                 finish();
                                             } else {
@@ -248,7 +250,7 @@ public class LoginActivity extends BaseActivity {
                                                 finish();
                                             }
                                             Toast.makeText(LoginActivity.this, "Logged in successfully", Toast.LENGTH_LONG).show();
-
+                                            ref.removeEventListener(valueEventListener);
                                         }
                                     },200);
                                 }
@@ -257,8 +259,8 @@ public class LoginActivity extends BaseActivity {
                                 public void onCancelled(DatabaseError databaseError) {
                                     Log.e("Firebase", "onCancelled", databaseError.toException());
                                 }
-                            });
-
+                            };
+                            ref.addValueEventListener(valueEventListener);
                         }
                     }
                 });

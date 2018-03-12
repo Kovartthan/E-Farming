@@ -1,5 +1,7 @@
 package com.ko.efarming.model;
 
+import com.google.firebase.auth.UserInfo;
+
 import java.io.Serializable;
 
 /**
@@ -12,6 +14,8 @@ public class ProductInfo implements Serializable {
     public String productPrice;
     public String imageUrl;
     public String productID;
+    public CompanyInfoPublic company_info;
+    public User user_info;
     public ProductInfo(){
 
     }
