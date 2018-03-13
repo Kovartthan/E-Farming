@@ -38,6 +38,7 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
     private String receiverID;
     private boolean isPause;
     private ArrayList<ProductInfo> productInfoArrayList;
+
     public ChatListFragment() {
 
     }
@@ -70,29 +71,21 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
 
     private void getProductInfo() {
         final DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid());
+                .getReference().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid()).child("all_chats");
         databaseReference.addValueEventListener(new ValueEventListener() {
+            ProductInfo productInfo;
+
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot snapshot : dataSnapshot.getChildren()){;
-                    databaseReference.child(snapshot.getValue().toString()).child("all_chats").addValueEventListener(new ValueEventListener() {
-                        ProductInfo productInfo;
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                    if (snapshot1.getKey().equals("detail_info")) {
-                                        productInfo = snapshot1.getValue(ProductInfo.class);
-                                    }
-                                }
-                                getChatUserInfo(snapshot.getKey(), productInfo);
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        for(DataSnapshot snapshot2 : snapshot1.getChildren()) {
+                            if (snapshot2.getKey().equals("detail_info")) {
+                                productInfo = snapshot2.getValue(ProductInfo.class);
                             }
                         }
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
+                        getChatUserInfo(snapshot1.getKey(), productInfo);
+                    }
                 }
             }
 

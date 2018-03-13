@@ -45,7 +45,7 @@ public class ChatInteractor implements ChatContract.Interactor {
                 .getReference().child(Constants.PRODUCT_INFO).child(productInfo.productID).child("all_chats").child(chat.receiverUid);
 
         final  DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference().child(Constants.USERS).child(productInfo.productID).child(chat.senderUid).child("all_chats").child(chat.receiverUid);
+                .getReference().child(Constants.USERS).child(chat.senderUid).child("all_chats").child(productInfo.productID).child(chat.receiverUid);
 
         databaseReference.getRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -122,7 +122,7 @@ public class ChatInteractor implements ChatContract.Interactor {
         final String room_type_2 = receiverUid + "_" + senderUid;
 
         final  DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference().child(Constants.USERS).child(receiver.productID).child(senderUid).child("all_chats").child(receiverUid);
+                .getReference().child(Constants.USERS).child(senderUid).child("all_chats").child(receiver.productID).child(receiverUid);
 
         databaseReference.getRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -130,7 +130,7 @@ public class ChatInteractor implements ChatContract.Interactor {
                 if (dataSnapshot.hasChild(room_type_1)) {
                     Log.e(TAG, "getMessageFromFirebaseUser: " + room_type_1 + " exists");
                     FirebaseDatabase.getInstance()
-                            .getReference().child(Constants.USERS).child(senderUid).child("all_chats").child(receiverUid)
+                            .getReference().child(Constants.USERS).child(senderUid).child("all_chats").child(receiver.productID).child(receiverUid)
                             .child(room_type_1).addChildEventListener(new ChildEventListener() {
                         @Override
                         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -161,7 +161,7 @@ public class ChatInteractor implements ChatContract.Interactor {
                 } else if (dataSnapshot.hasChild(room_type_2)) {
                     Log.e(TAG, "getMessageFromFirebaseUser: " + room_type_2 + " exists");
                     FirebaseDatabase.getInstance()
-                            .getReference().child(Constants.USERS).child(senderUid).child("all_chats").child(receiverUid)
+                            .getReference().child(Constants.USERS).child(senderUid).child("all_chats").child(receiver.productID).child(receiverUid)
                             .child(room_type_2).addChildEventListener(new ChildEventListener() {
                         @Override
                         public void onChildAdded(DataSnapshot dataSnapshot, String s) {

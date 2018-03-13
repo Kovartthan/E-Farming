@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/E-Farming.iml" filepath="$PROJECT_DIR$/E-Farming.iml" />
       <module fileurl="file://D:\studio_kovartthan_workspace\Examples\RD\MyApplication1\E-Farming.iml" filepath="D:\studio_kovartthan_workspace\Examples\RD\MyApplication1\E-Farming.iml" />
-      <module fileurl="file://$PROJECT_DIR$/MyApplication1.iml" filepath="$PROJECT_DIR$/MyApplication1.iml" />
       <module fileurl="file://F:\Projects\efarming_new\E-Farming\MyApplication1.iml" filepath="F:\Projects\efarming_new\E-Farming\MyApplication1.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
