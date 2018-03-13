@@ -1,38 +1,33 @@
 package com.ko.efarming.login;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,19 +46,17 @@ import com.google.firebase.storage.UploadTask;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.model.User;
+import com.ko.efarming.model.UserFingerPrint;
 import com.ko.efarming.util.AlertUtils;
 import com.ko.efarming.util.CameraUtils;
 import com.ko.efarming.util.CompressImage;
 import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
-import com.ko.efarming.util.FileUtils2;
 import com.ko.efarming.util.TempManager;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.ko.efarming.util.Constants.PERMISSIONS;
@@ -89,6 +82,10 @@ public class SignUpActivity extends BaseActivity {
     private String imagerls = "";
     private String imagePathForFireBase = "";
     private CameraUtils cameraUtils;
+    private boolean isFingerPrintEnabled;
+    private RadioGroup radioGroup;
+    private FingerprintManager fingerprintManager;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -145,7 +142,16 @@ public class SignUpActivity extends BaseActivity {
         mEmailSignInButton = findViewById(R.id.email_sign_up_button);
         mName = findViewById(R.id.name);
         mConfirmPass = findViewById(R.id.conf_password);
-        cameraUtils = new CameraUtils(this,SignUpActivity.this);
+        cameraUtils = new CameraUtils(this, SignUpActivity.this);
+        radioGroup = findViewById(R.id.rg_fingerprint);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
+            if (!fingerprintManager.isHardwareDetected()) {
+                radioGroup.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            radioGroup.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void setupDefault() {
@@ -195,10 +201,10 @@ public class SignUpActivity extends BaseActivity {
             }
         });
 
-        addTextChangeListener(mEmailView,emailLayout);
-        addTextChangeListener(mPasswordView,passwordLayout);
-        addTextChangeListener(mConfirmPass,confirmPassLayout);
-        addTextChangeListener(mName,nameLayout);
+        addTextChangeListener(mEmailView, emailLayout);
+        addTextChangeListener(mPasswordView, passwordLayout);
+        addTextChangeListener(mConfirmPass, confirmPassLayout);
+        addTextChangeListener(mName, nameLayout);
 
         mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -220,8 +226,17 @@ public class SignUpActivity extends BaseActivity {
                 finish();
             }
         });
-    }
 
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.rb_yes)
+                    isFingerPrintEnabled = true;
+                else
+                    isFingerPrintEnabled = false;
+            }
+        });
+    }
 
 
     @Override
@@ -364,12 +379,18 @@ public class SignUpActivity extends BaseActivity {
             return;
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (isFingerPrintEnabled && !fingerprintManager.hasEnrolledFingerprints()) {
+                AlertUtils.showAlert(this, "No fingerprints enrolled in your device, go to settings to enroll your fingerprints.", null, false);
+            }
+        }
+
         doSignUp();
     }
 
     private void doSignUp() {
 
-        if(isFinishing())
+        if (isFinishing())
             return;
 
         hideSoftKeyboard(this);
@@ -431,7 +452,10 @@ public class SignUpActivity extends BaseActivity {
                                         if (efProgressDialog.isShowing())
                                             efProgressDialog.dismiss();
                                         Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
-                                        addUserToDatabase(SignUpActivity.this, getApp().getFireBaseAuth().getCurrentUser());
+                                        if (isFingerPrintEnabled)
+                                            addFingerPrintToDatabase(SignUpActivity.this, getApp().getFireBaseAuth().getCurrentUser());
+                                        else
+                                            addUserToDatabase(SignUpActivity.this, getApp().getFireBaseAuth().getCurrentUser());
                                         finish();
                                     }
 
@@ -441,7 +465,10 @@ public class SignUpActivity extends BaseActivity {
                                 if (efProgressDialog.isShowing())
                                     efProgressDialog.dismiss();
                                 Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_LONG).show();
-                                addUserToDatabase(SignUpActivity.this, getApp().getFireBaseAuth().getCurrentUser());
+                                if (isFingerPrintEnabled)
+                                    addFingerPrintToDatabase(SignUpActivity.this, getApp().getFireBaseAuth().getCurrentUser());
+                                else
+                                    addUserToDatabase(SignUpActivity.this, getApp().getFireBaseAuth().getCurrentUser());
                                 finish();
                             }
                         }
@@ -451,10 +478,10 @@ public class SignUpActivity extends BaseActivity {
     }
 
 
-    public void addUserToDatabase(Context context, FirebaseUser firebaseUser) {
+    public void addUserToDatabase(Context context, final FirebaseUser firebaseUser) {
         User user = new User(firebaseUser.getUid(),
                 firebaseUser.getEmail(),
-                FirebaseInstanceId.getInstance().getToken(), imagerls,false);
+                FirebaseInstanceId.getInstance().getToken(), imagerls, false,"");
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)
@@ -464,11 +491,40 @@ public class SignUpActivity extends BaseActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            // successfully added user
                         } else {
-                            // failed to add user
                         }
                     }
                 });
+    }
+
+    public void addFingerPrintToDatabase(Context context, final FirebaseUser firebaseUser) {
+        User user = new User(firebaseUser.getUid(),
+                firebaseUser.getEmail(),
+                FirebaseInstanceId.getInstance().getToken(), imagerls, false, mConfirmPass.getText().toString());
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.USERS)
+                .child(firebaseUser.getUid())
+                .setValue(user)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                                addFingerPrintAuthentication(firebaseUser);
+                        } else {
+
+                        }
+                    }
+                });
+    }
+
+
+    @SuppressLint("HardwareIds")
+    public void addFingerPrintAuthentication(FirebaseUser firebaseUser) {
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child("fingerprint")
+                .child(android.os.Build.SERIAL)
+                .setValue(firebaseUser.getUid());
     }
 }

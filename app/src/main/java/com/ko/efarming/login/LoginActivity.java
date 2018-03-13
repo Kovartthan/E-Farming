@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
@@ -39,6 +40,7 @@ import com.ko.efarming.company_info.CompanyInfoActivity;
 import com.ko.efarming.home.activities.HomeActivity;
 import com.ko.efarming.login.fingerprint.FingerPrintUtils;
 import com.ko.efarming.login.fingerprint.FingerprintHandler;
+import com.ko.efarming.login.fingerprint.OnFingerPrintAuthenticationListener;
 import com.ko.efarming.model.User;
 import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
@@ -48,7 +50,7 @@ import javax.crypto.Cipher;
 import static com.ko.efarming.util.DeviceUtils.hideSoftKeyboard;
 import static com.ko.efarming.util.TextUtils.isValidEmail;
 
-public class LoginActivity extends BaseActivity {
+public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenticationListener {
     private EditText mEmailView;
     private EditText mPasswordView;
     private Button mEmailSignInButton;
@@ -64,6 +66,8 @@ public class LoginActivity extends BaseActivity {
     private FingerprintHandler fingerprintHandler;
     private FingerprintManager fingerprintManager;
     private KeyguardManager keyguardManager;
+    private Button txtFingerPrint;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,15 +99,20 @@ public class LoginActivity extends BaseActivity {
         txtSignUp = findViewById(R.id.txt_sign_up);
         emailLayout = findViewById(R.id.email_layout);
         passwordLayout = findViewById(R.id.password_layout);
+        txtFingerPrint = findViewById(R.id.btn_fingerprint);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
             keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-            fingerPrintUtils = new FingerPrintUtils(this,this,fingerprintManager,keyguardManager);
+            fingerPrintUtils = new FingerPrintUtils(this, this, fingerprintManager, keyguardManager);
             fingerprintHandler = new FingerprintHandler(this);
+            fingerprintHandler.setOnFingerPrintAuthenticationListener(this);
             cipher = fingerPrintUtils.instantiateCipher();
-            if(cipher != null){
-                    cryptoObject = new FingerprintManager.CryptoObject(cipher);
+            if (cipher != null) {
+                cryptoObject = new FingerprintManager.CryptoObject(cipher);
             }
+        } else {
+            txtFingerPrint.setVisibility(View.INVISIBLE);
         }
 
     }
@@ -196,6 +205,15 @@ public class LoginActivity extends BaseActivity {
                 startActivity(new Intent(LoginActivity.this, ForgotActivity.class));
             }
         });
+
+        txtFingerPrint.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onClick(View v) {
+                txtFingerPrint.setText("Place your finger");
+                fingerprintHandler.completeFingerAuthentication(fingerprintManager, cryptoObject);
+            }
+        });
     }
 
     private void attemptLogin() {
@@ -259,9 +277,9 @@ public class LoginActivity extends BaseActivity {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     User user = dataSnapshot.getValue(User.class);
-                                    Log.e("Firebase", "user  "+user.email);
+                                    Log.e("Firebase", "user  " + user.email);
                                     isCompanyProfileUpdated = user.isCompanyProfileUpdated;
-                                    Log.e("Firebase", "isCompanyProfileUpdated "+isCompanyProfileUpdated);
+                                    Log.e("Firebase", "isCompanyProfileUpdated " + isCompanyProfileUpdated);
                                     new Handler().postDelayed(new Runnable() {
                                         @Override
                                         public void run() {
@@ -278,7 +296,7 @@ public class LoginActivity extends BaseActivity {
                                             Toast.makeText(LoginActivity.this, "Logged in successfully", Toast.LENGTH_LONG).show();
                                             ref.removeEventListener(valueEventListener);
                                         }
-                                    },200);
+                                    }, 200);
                                 }
 
                                 @Override
@@ -299,7 +317,7 @@ public class LoginActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 isCompanyProfileUpdated = user.isCompanyProfileUpdated;
-                Log.e("Firebase", "isCompanyProfileUpdated "+isCompanyProfileUpdated);
+                Log.e("Firebase", "isCompanyProfileUpdated " + isCompanyProfileUpdated);
             }
 
             @Override
@@ -308,5 +326,58 @@ public class LoginActivity extends BaseActivity {
             }
         });
         return isCompanyProfileUpdated;
+    }
+
+    @Override
+    public void onFingerPrintAuthenticationError(String error) {
+        Toast.makeText(this, "FIngerprint Authentication failed" + error, Toast.LENGTH_SHORT).show();
+        txtFingerPrint.setText("Use fingerprint");
+    }
+
+    @Override
+    public void onFingerPrintAuthenticationSucceeded() {
+        fetchLoginDetails();
+    }
+
+    private void fetchLoginDetails() {
+        getApp().getFireBaseDataBase().child("fingerprint").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot.getKey().equals(android.os.Build.SERIAL)) {
+                        getUserInfo(snapshot.getValue().toString());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getUserInfo(String uid) {
+        DatabaseReference ref = getApp().getFireBaseDataBase().child(Constants.USERS).child(uid);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User userFingerPrint = dataSnapshot.getValue(User.class);
+                mEmailView.setText(userFingerPrint.email);
+                mPasswordView.setText(userFingerPrint.password);
+                attemptLogin();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onFingerPrintAuthenticationFailed() {
+        Toast.makeText(this, "FIngerprint Authentication failed", Toast.LENGTH_SHORT).show();
+        txtFingerPrint.setText("Use fingerprint");
     }
 }

@@ -33,7 +33,7 @@
             <LinearLayout
                 android:id="@+id/email_login_form"
                 android:layout_width="match_parent"
-                android:layout_height="420dp"
+                android:layout_height="450dp"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
                 android:background="@drawable/white_semi_round_corner"
@@ -154,6 +154,31 @@
 
                     </android.support.design.widget.TextInputLayout>
 
+                    <RadioGroup
+                        android:id="@+id/rg_fingerprint"
+                        android:layout_marginTop="10dp"
+                        android:weightSum="2"
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <RadioButton
+                            android:id="@+id/rb_yes"
+                            android:textColor="@color/colorPrimary"
+                            android:layout_weight="1"
+                            android:text="With Fingerprint"
+                            android:textSize="12sp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                        <RadioButton
+                            android:id="@+id/rb_no"
+                            android:layout_weight="1"
+                            android:textSize="12sp"
+                            android:textColor="@color/colorPrimary"
+                            android:text="Without Fingerprint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </RadioGroup>
+
                 </LinearLayout>
 
 
@@ -164,7 +189,7 @@
                 android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="395dp"
+                android:layout_marginTop="425dp"
                 android:background="@drawable/ripple_green_button"
                 android:text="@string/sign_up"
                 android:textColor="@android:color/white"
@@ -175,7 +200,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="450dp"
+                android:layout_marginTop="480dp"
                 android:padding="10dp"
                 android:text="@string/alrdy_have_ac"
                 android:textColor="@android:color/white"

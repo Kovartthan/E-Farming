@@ -12,9 +12,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-
-
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,7 +21,7 @@
         <LinearLayout
             android:id="@+id/email_login_form"
             android:layout_width="match_parent"
-            android:layout_height="370dp"
+            android:layout_height="400dp"
             android:layout_centerInParent="true"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
@@ -110,6 +107,17 @@
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="12sp" />
 
+            <Button
+                android:id="@+id/btn_fingerprint"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center"
+                android:background="@drawable/ripple_green_button"
+                android:text="Use FingerPrint"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
         </LinearLayout>
 
         <Button
@@ -117,7 +125,7 @@
             android:layout_width="150dp"
             android:layout_height="50dp"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="410dp"
+            android:layout_marginTop="440dp"
             android:background="@drawable/ripple_green_button"
             android:text="@string/action_sign_in"
             android:textColor="@android:color/white"
@@ -128,7 +136,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="460dp"
+            android:layout_marginTop="490dp"
             android:padding="10dp"
             android:text="Don't have a account ? Sign up"
             android:textColor="@android:color/white"
