@@ -340,7 +340,7 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
     }
 
     private void fetchLoginDetails() {
-        getApp().getFireBaseDataBase().child("fingerprint").addListenerForSingleValueEvent(new ValueEventListener() {
+        getApp().getFireBaseDataBase().child("fingerprint").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -352,7 +352,7 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.e("Fingerprint","error "+ databaseError.getMessage());
             }
         });
     }

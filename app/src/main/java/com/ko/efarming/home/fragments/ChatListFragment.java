@@ -24,6 +24,7 @@ import com.ko.efarming.model.ProductBean;
 import com.ko.efarming.model.ProductInfo;
 import com.ko.efarming.model.User;
 import com.ko.efarming.util.Constants;
+import com.ko.efarming.util.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -74,7 +75,7 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
                 .getReference().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid()).child("all_chats");
         databaseReference.addValueEventListener(new ValueEventListener() {
             ProductInfo productInfo;
-
+            String key;
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -84,9 +85,12 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
                                 productInfo = snapshot2.getValue(ProductInfo.class);
                             }
                         }
-                        getChatUserInfo(snapshot1.getKey(), productInfo);
+                        key = snapshot1.getKey();
+
                     }
                 }
+                if(productInfo != null & !TextUtils.isNullOrEmpty(key))
+                getChatUserInfo(key, productInfo);
             }
 
             @Override

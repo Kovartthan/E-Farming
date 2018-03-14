@@ -38,7 +38,7 @@ public class ChatInteractor implements ChatContract.Interactor {
 
     @Override
     public void sendMessageToFirebaseUser(final Context context, final Chat chat, final String receiverFirebaseToken, final ProductInfo productInfo) {
-//        final String room_type_1 = chat.senderUid + "_" + chat.receiverUid;
+        final String room_type_1 = chat.senderUid + "_" + chat.receiverUid;
         final String room_type_2 = chat.receiverUid + "_" + chat.senderUid;
 
         final DatabaseReference adminDatabaseReference =   FirebaseDatabase.getInstance()
@@ -46,6 +46,8 @@ public class ChatInteractor implements ChatContract.Interactor {
 
         final  DatabaseReference databaseReference = FirebaseDatabase.getInstance()
                 .getReference().child(Constants.USERS).child(chat.senderUid).child("all_chats").child(productInfo.productID).child(chat.receiverUid);
+
+        final String fbKey =   adminDatabaseReference.push().getKey();
 
         databaseReference.getRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -55,11 +57,11 @@ public class ChatInteractor implements ChatContract.Interactor {
                     databaseReference.child(room_type_1).child(String.valueOf(chat.timestamp)).setValue(chat);
                 } else*/ if (dataSnapshot.hasChild(room_type_2)) {
                     Log.e(TAG, "sendMessageToFirebaseUser: " + room_type_2 + " exists");
-                    databaseReference.child(room_type_2).child(String.valueOf(chat.timestamp)).setValue(chat);
+                    databaseReference.child(room_type_2).child(String.valueOf(fbKey)).setValue(chat);
                 } else {
                     Log.e(TAG, "sendMessageToFirebaseUser: success");
 //                    databaseReference.child(room_type_1).child(String.valueOf(chat.timestamp)).setValue(chat);
-                    databaseReference.child(room_type_2).child(String.valueOf(chat.timestamp)).setValue(chat);
+                    databaseReference.child(room_type_2).child(String.valueOf(fbKey)).setValue(chat);
                     getMessageFromFirebaseUser(chat.senderUid, chat.receiverUid,productInfo);
                 }
                 // send push notification to the receiver
@@ -85,10 +87,10 @@ public class ChatInteractor implements ChatContract.Interactor {
                     adminDatabaseReference.child(Constants.CHAT_ROOMS).child(room_type_1).child(String.valueOf(chat.timestamp)).setValue(chat);
                 } else */if (dataSnapshot.hasChild(room_type_2)) {
                     Log.e(TAG, "sendMessageToFirebaseUser: " + room_type_2 + " exists");
-                    adminDatabaseReference.child(Constants.CHAT_ROOMS).child(room_type_2).child(String.valueOf(chat.timestamp)).setValue(chat);
+                    adminDatabaseReference.child(Constants.CHAT_ROOMS).child(room_type_2).child(String.valueOf(fbKey)).setValue(chat);
                 } else {
                     Log.e(TAG, "sendMessageToFirebaseUser: success");
-                    adminDatabaseReference.child(Constants.CHAT_ROOMS).child(room_type_2).child(String.valueOf(chat.timestamp)).setValue(chat);
+                    adminDatabaseReference.child(Constants.CHAT_ROOMS).child(room_type_2).child(String.valueOf(fbKey)).setValue(chat);
                 }
             }
 
