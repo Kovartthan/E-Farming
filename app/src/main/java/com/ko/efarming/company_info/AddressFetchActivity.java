@@ -57,6 +57,7 @@ import java.util.Locale;
 import static com.ko.efarming.util.Constants.GET_ADDRESS;
 import static com.ko.efarming.util.Constants.GET_LATITUDE;
 import static com.ko.efarming.util.Constants.GET_LONGITUDE;
+import static com.ko.efarming.util.Constants.RC_CITY;
 import static com.ko.efarming.util.Constants.REQUEST_CHECK_SETTINGS;
 
 public class AddressFetchActivity extends BaseActivity implements OnMapReadyCallback,
@@ -81,7 +82,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     private LocationRequest mLocationRequest;
     public final static int FAST_LOCATION_FREQUENCY = 1000;
     public final static int LOCATION_FREQUENCY = 2 * 1000;
-
+    private String city;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
@@ -152,6 +153,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                     addressIntent.putExtra(GET_ADDRESS, address);
                     addressIntent.putExtra(GET_LATITUDE, getLat);
                     addressIntent.putExtra(GET_LONGITUDE, getLong);
+                    addressIntent.putExtra(RC_CITY,city);
                     setResult(RESULT_OK, addressIntent);
                     finish();
                 } else {
@@ -274,8 +276,10 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                 if (!TextUtils.isEmpty(address)) {
                     locationAddress.append(address);
                 } else {
-                    if (!TextUtils.isEmpty(city))
+                    if (!TextUtils.isEmpty(city)) {
                         locationList.add(city);
+                        this.city = city;
+                    }
                     if (!TextUtils.isEmpty(state))
                         locationList.add(state);
                     if (!TextUtils.isEmpty(country))
@@ -299,10 +303,11 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
     }
 
     @Override
-    public void onFetchedAddress(String address) {
+    public void onFetchedAddress(String address,String city) {
         if (!TextUtils.isEmpty(address)) {
             this.address = address;
             imgSubmitAddress.setVisibility(View.VISIBLE);
+            this.city = city;
             txtAddress.setText(address);
         } else {
             imgSubmitAddress.setVisibility(View.INVISIBLE);

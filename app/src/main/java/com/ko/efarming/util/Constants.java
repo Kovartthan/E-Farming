@@ -37,4 +37,5 @@ public interface Constants {
     public static final String ARG_CHAT_ROOMS = "chat_rooms";
     public static final String ARG_FIREBASE_TOKEN = "firebaseToken";
     public static final int REQUEST_USE_FINGERPRINT = 300;
+    public static final String RC_CITY = "city";
 }

@@ -53,6 +53,7 @@ import static com.ko.efarming.util.Constants.GET_LATITUDE;
 import static com.ko.efarming.util.Constants.GET_LONGITUDE;
 import static com.ko.efarming.util.Constants.PERMISSIONS;
 import static com.ko.efarming.util.Constants.RC_ADDRESS;
+import static com.ko.efarming.util.Constants.RC_CITY;
 import static com.ko.efarming.util.Constants.RC_MARSH_MALLOW_LOCATION_PERMISSION;
 import static com.ko.efarming.util.Constants.REQUEST_PERMISSION_READ_STORAGE;
 import static com.ko.efarming.util.Constants.REQUEST_PICTURE_FROM_CAMERA;
@@ -76,7 +77,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
     private AppBarLayout appBarLayout;
     private double putLat, putLong;
     private boolean isPermissionFlag = false;
-
+    private String city;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -116,6 +117,9 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                     if (data.hasExtra(GET_LATITUDE) && data.hasExtra(GET_LONGITUDE)) {
                         putLat = data.getDoubleExtra(GET_LATITUDE, 0);
                         putLong = data.getDoubleExtra(GET_LONGITUDE, 0);
+                    }
+                    if(data.hasExtra(RC_CITY)){
+                        city = data.getStringExtra(RC_CITY);
                     }
                 }
             }
@@ -360,6 +364,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             isAddedDbPublic = true;
+                            putCityIntoDB();
                             redirectToHomeScreen();
                         } else {
                             isAddedDbPublic = false;
@@ -447,5 +452,10 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
 
+    }
+
+    private void putCityIntoDB(){
+        String key = FirebaseDatabase.getInstance().getReference().push().getKey();
+        FirebaseDatabase.getInstance().getReference().child("location_filter").child(key).setValue(city);
     }
 }

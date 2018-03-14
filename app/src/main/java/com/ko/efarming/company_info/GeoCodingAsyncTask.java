@@ -117,7 +117,7 @@ class GeoCodingAsyncTask extends AsyncTask<String, Void, String[]> {
                             locationAddress.append(locationList.get(j) + ",");
                         }
                     }
-                    delegate.onFetchedAddress(locationAddress.toString());
+                    delegate.onFetchedAddress(locationAddress.toString(),City);
                 }
             }else{
                 delegate.onFetchFailure(Constants.LOCATION_FETCH_FAILED);
