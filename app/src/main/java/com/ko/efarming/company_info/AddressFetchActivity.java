@@ -17,6 +17,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -168,6 +169,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
         mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMarkerDragListener(this);
+        mMap.getUiSettings().setZoomControlsEnabled(false);
         addLocationButton();
     }
 
@@ -176,6 +178,15 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
             return;
         }
         mMap.setMyLocationEnabled(true);
+        View mapView = mapFragment.getView();
+        if (mapView != null && mapView.findViewById(Integer.parseInt("1")) != null) {
+            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                    locationButton.getLayoutParams();
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, 30, 30);
+        }
     }
 
     @Override

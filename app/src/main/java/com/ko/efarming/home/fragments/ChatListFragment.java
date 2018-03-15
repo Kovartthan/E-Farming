@@ -18,16 +18,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ko.efarming.R;
 import com.ko.efarming.chat.OnChatOpenListener;
+import com.ko.efarming.home.ChatListBean;
 import com.ko.efarming.home.activities.ChatActivity;
 import com.ko.efarming.home.adapters.ChatListAdapter;
 import com.ko.efarming.model.ProductBean;
 import com.ko.efarming.model.ProductInfo;
 import com.ko.efarming.model.User;
 import com.ko.efarming.util.Constants;
-import com.ko.efarming.util.TextUtils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashSet;
 
 import static com.ko.efarming.EFApp.getApp;
 
@@ -74,23 +74,29 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
         final DatabaseReference databaseReference = FirebaseDatabase.getInstance()
                 .getReference().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid()).child("all_chats");
         databaseReference.addValueEventListener(new ValueEventListener() {
-            ProductInfo productInfo;
-            String key;
+            ArrayList<ChatListBean> chatListBeanArrayList = new ArrayList<>();
+
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        for(DataSnapshot snapshot2 : snapshot1.getChildren()) {
+                        ProductInfo productInfo = null;
+                        for (DataSnapshot snapshot2 : snapshot1.getChildren()) {
                             if (snapshot2.getKey().equals("detail_info")) {
                                 productInfo = snapshot2.getValue(ProductInfo.class);
                             }
                         }
-                        key = snapshot1.getKey();
-
+                        String key = snapshot1.getKey();
+                        chatListBeanArrayList.add(new ChatListBean(productInfo, key));
                     }
                 }
-                if(productInfo != null & !TextUtils.isNullOrEmpty(key))
-                getChatUserInfo(key, productInfo);
+                HashSet<ChatListBean> hashSet = new HashSet<ChatListBean>();
+                hashSet.addAll(chatListBeanArrayList);
+                chatListBeanArrayList.clear();
+                chatListBeanArrayList.addAll(hashSet);
+                for (int i = 0; i < chatListBeanArrayList.size(); i++) {
+                    getChatUserInfo(chatListBeanArrayList.get(i).key, chatListBeanArrayList.get(i).productInfo);
+                }
             }
 
             @Override
