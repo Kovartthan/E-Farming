@@ -15,12 +15,15 @@ public interface ChatContract {
         void onGetMessagesSuccess(Chat chat);
 
         void onGetMessagesFailure(String message);
+
+        void onGetOnlineStatus(boolean isOnline , long timeStamp);
     }
 
     interface Presenter {
         void sendMessage(Context context, Chat chat, String receiverFirebaseToken, ProductInfo key);
 
         void getMessage(String senderUid, String receiverUid, ProductInfo key);
+        void getOnlineStatus(String receiverUid);
     }
 
     interface Interactor {
@@ -39,5 +42,9 @@ public interface ChatContract {
         void onGetMessagesSuccess(Chat chat);
 
         void onGetMessagesFailure(String message);
+    }
+
+    interface OnOnlineStatusListener {
+        void onSendOnlineStatus(boolean isOnline , long timeStamp);
     }
 }

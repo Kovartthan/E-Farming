@@ -196,6 +196,11 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Tex
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onGetOnlineStatus(boolean isOnline, long timeStamp) {
+
+    }
+
 
 //    @Subscribe
 //    public void onPushNotificationEvent(PushNotificationEvent pushNotificationEvent) {

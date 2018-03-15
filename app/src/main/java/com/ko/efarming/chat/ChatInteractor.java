@@ -10,10 +10,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ko.efarming.model.Chat;
+import com.ko.efarming.model.OnlineStatus;
 import com.ko.efarming.model.ProductInfo;
 import com.ko.efarming.util.Constants;
 
 import static com.ko.efarming.EFApp.getApp;
+import static com.ko.efarming.util.Constants.ONLINE_STATUS;
 
 
 public class ChatInteractor implements ChatContract.Interactor {
@@ -21,6 +23,7 @@ public class ChatInteractor implements ChatContract.Interactor {
 
     private ChatContract.OnSendMessageListener mOnSendMessageListener;
     private ChatContract.OnGetMessagesListener mOnGetMessagesListener;
+    private ChatContract.OnOnlineStatusListener mOnOnlineStatusListener;
 
     public ChatInteractor(ChatContract.OnSendMessageListener onSendMessageListener) {
         this.mOnSendMessageListener = onSendMessageListener;
@@ -31,9 +34,10 @@ public class ChatInteractor implements ChatContract.Interactor {
     }
 
     public ChatInteractor(ChatContract.OnSendMessageListener onSendMessageListener,
-                          ChatContract.OnGetMessagesListener onGetMessagesListener) {
+                          ChatContract.OnGetMessagesListener onGetMessagesListener,ChatContract.OnOnlineStatusListener onOnlineStatusListener) {
         this.mOnSendMessageListener = onSendMessageListener;
         this.mOnGetMessagesListener = onGetMessagesListener;
+        this.mOnOnlineStatusListener = onOnlineStatusListener;
     }
 
     @Override
@@ -100,6 +104,7 @@ public class ChatInteractor implements ChatContract.Interactor {
             }
         });
     }
+
 
 
 
@@ -199,6 +204,25 @@ public class ChatInteractor implements ChatContract.Interactor {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 mOnGetMessagesListener.onGetMessagesFailure("Unable to get message: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    void getOnlineStatusForReceiver(final String receiverId){
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.USERS)
+                .child(receiverId).child(ONLINE_STATUS).addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                OnlineStatus onlineStatus = dataSnapshot.getValue(OnlineStatus.class);
+                mOnOnlineStatusListener.onSendOnlineStatus(onlineStatus.isOnlineStatus,onlineStatus.timestamp);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Online status unavailable");
             }
         });
     }

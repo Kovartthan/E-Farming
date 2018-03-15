@@ -68,6 +68,7 @@ public class HomeActivity extends BaseActivity {
         mAdapter.addFragment(chatListFragment, "Chats");
         viewPager.setAdapter(mAdapter);
         tabLayout.setupWithViewPager(viewPager);
+        setOnlineStatus(true);
     }
 
     private void setupEvent() {
