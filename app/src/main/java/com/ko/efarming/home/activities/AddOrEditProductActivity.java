@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
@@ -90,7 +91,9 @@ public class AddOrEditProductActivity extends BaseActivity {
     private String productKey;
     private CompanyInfo companyInfo;
     private User userDetails = null;
-
+    private TextInputLayout productNameLayout;
+    private TextInputLayout productQuantityLayout;
+    private TextInputLayout productPriceLayout;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -147,6 +150,9 @@ public class AddOrEditProductActivity extends BaseActivity {
         edtProductPrice = findViewById(R.id.edt_product_price);
         btnAdd = findViewById(R.id.submit);
         cameraUtils = new CameraUtils(this, AddOrEditProductActivity.this);
+        productNameLayout = findViewById(R.id.name_layout);
+        productPriceLayout = findViewById(R.id.product_price_layout);
+        productQuantityLayout = findViewById(R.id.product_quan_layout);
     }
 
     private void setupDefault() {
@@ -266,28 +272,9 @@ public class AddOrEditProductActivity extends BaseActivity {
                 }
             }
         });
-        addTextListener(edtProductName);
-        addTextListener(edtProductPrice);
-        addTextListener(edtProductQuantity);
-    }
-
-    private void addTextListener(final EditText editText) {
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                editText.setError(null);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
+        addTextChangeListener(edtProductName,productNameLayout);
+        addTextChangeListener(edtProductPrice,productPriceLayout);
+        addTextChangeListener(edtProductQuantity,productQuantityLayout);
     }
 
     @Override
@@ -381,17 +368,21 @@ public class AddOrEditProductActivity extends BaseActivity {
         hideSoftKeyboard(this);
 
         if (TextUtils.isEmpty(edtProductName.getText())) {
-            edtProductName.setError("Enter your product name");
+            productNameLayout.setError("Enter your product name");
+            productNameLayout.setErrorEnabled(true);
+            return;
+        }
+
+
+        if (TextUtils.isEmpty(edtProductQuantity.getText())) {
+            productQuantityLayout.setError("Enter your product quantity");
+            productQuantityLayout.setErrorEnabled(true);
             return;
         }
 
         if (TextUtils.isEmpty(edtProductPrice.getText())) {
-            edtProductPrice.setError("Enter your product price");
-            return;
-        }
-
-        if (TextUtils.isEmpty(edtProductQuantity.getText())) {
-            edtProductQuantity.setError("Enter your product quantity");
+            productPriceLayout.setError("Enter your product price");
+            productPriceLayout.setErrorEnabled(true);
             return;
         }
 
@@ -417,6 +408,8 @@ public class AddOrEditProductActivity extends BaseActivity {
             updateProductInfoOnDb();
         else
             addProductInfoToUsersDatabase();
+
+
 
 
     }
@@ -506,8 +499,9 @@ public class AddOrEditProductActivity extends BaseActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
-                    efProgressDialog.dismiss();
                     if (isAddedDbPrivate && isAddedDbPublic) {
+                        if (efProgressDialog != null)
+                            efProgressDialog.dismiss();
                         Toast.makeText(AddOrEditProductActivity.this, "Product added successfully", Toast.LENGTH_LONG).show();
                         setResult(RESULT_OK);
                         finish();
@@ -731,7 +725,6 @@ public class AddOrEditProductActivity extends BaseActivity {
                                     .getReference()
                                     .child(Constants.PRODUCT_INFO)
                                     .child(key).child(Constants.COMPANY_INFO).setValue(companyInfo);
-                            efProgressDialog.dismiss();
                             if (isAddedDbPrivate && isAddedDbPublic) {
                                 Toast.makeText(AddOrEditProductActivity.this, "Product edited successfully", Toast.LENGTH_LONG).show();
                                 setResult(RESULT_OK);
