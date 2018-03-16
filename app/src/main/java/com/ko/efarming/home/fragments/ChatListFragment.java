@@ -67,15 +67,16 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
 
     private void setupDefault() {
         getProductInfo();
-
     }
+
+    ValueEventListener productInfoListener;
 
     private void getProductInfo() {
         final DatabaseReference databaseReference = FirebaseDatabase.getInstance()
                 .getReference().child(Constants.USERS).child(getApp().getFireBaseAuth().getCurrentUser().getUid()).child("all_chats");
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            ArrayList<ChatListBean> chatListBeanArrayList = new ArrayList<>();
 
+        productInfoListener = new ValueEventListener() {
+            ArrayList<ChatListBean> chatListBeanArrayList = new ArrayList<>();
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -90,7 +91,7 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
                         chatListBeanArrayList.add(new ChatListBean(productInfo, key));
                     }
                 }
-                HashSet<ChatListBean> hashSet = new HashSet<ChatListBean>();
+                HashSet<ChatListBean> hashSet = new HashSet<>();
                 hashSet.addAll(chatListBeanArrayList);
                 chatListBeanArrayList.clear();
                 chatListBeanArrayList.addAll(hashSet);
@@ -103,8 +104,8 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
-
+        };
+        databaseReference.addValueEventListener(productInfoListener);
     }
 
 
@@ -135,9 +136,10 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
 
     }
 
+    private ValueEventListener chatUserListeener ;
+
     private void getChatUserInfo(final String key, final ProductInfo productInfo) {
-        FirebaseDatabase.getInstance()
-                .getReference().child("client_users").child(key).addValueEventListener(new ValueEventListener() {
+        chatUserListeener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
@@ -149,7 +151,9 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        FirebaseDatabase.getInstance()
+                .getReference().child("client_users").child(key).addValueEventListener(chatUserListeener);
 
     }
 
@@ -166,10 +170,10 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
     public void onResume() {
         super.onResume();
         if (isPause) {
-            chatList = new ArrayList<>();
-            chatListAdapter.updateList(chatList);
+//            chatList = new ArrayList<>();
+//            chatListAdapter.updateList(chatList);
 //            getChatsList();
-            getProductInfo();
+//            getProductInfo();
             isPause = true;
         }
     }
@@ -179,4 +183,22 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
         super.onPause();
         isPause = true;
     }
+
+    public void clearData() {
+        if (chatListAdapter != null)
+            chatListAdapter.clearList();
+        if (chatList != null)
+            chatList.clear();
+        if (productInfoListener != null)
+            getApp().getFireBaseDataBase().removeEventListener(productInfoListener);
+        if (chatUserListeener != null)
+            getApp().getFireBaseDataBase().removeEventListener(chatUserListeener);
+    }
+
+    public void reInit(){
+        getProductInfo();
+    }
+
+
+
 }

@@ -79,4 +79,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    public void clearList(){
+        chatList.clear();
+        notifyDataSetChanged();
+    }
+
 }

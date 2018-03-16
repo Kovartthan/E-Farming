@@ -48,21 +48,20 @@
             android:layout_height="wrap_content">
 
             <RelativeLayout
+                android:paddingBottom="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="430dp"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/white_semi_round_corner"
-                android:orientation="vertical"
-                android:paddingBottom="80dp">
+                android:orientation="vertical">
 
                 <FrameLayout
                     android:id="@+id/photo_layout"
-                    android:background="@color/background_grey"
                     android:layout_width="match_parent"
                     android:layout_height="180dp">
 
@@ -83,6 +82,11 @@
                         android:scaleType="centerCrop" />
 
                 </FrameLayout>
+
+                <View
+                    android:background="@color/colorPrimaryDark"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/name_layout"
@@ -105,7 +109,7 @@
                         android:maxLength="25"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textColorHint="@android:color/white"
                         android:textSize="12sp" />
 
@@ -132,7 +136,7 @@
                         android:maxLength="3"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textColorHint="@android:color/white"
                         android:textSize="12sp" />
 
@@ -159,7 +163,7 @@
                         android:maxLength="8"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textColorHint="@android:color/white"
                         android:textSize="12sp" />
 
@@ -171,7 +175,7 @@
                     android:layout_width="120dp"
                     android:layout_height="50dp"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="430dp"
+                    android:layout_marginTop="425dp"
                     android:background="@drawable/ripple_green_button"
                     android:text="@string/submit"
                     android:textColor="@android:color/white"

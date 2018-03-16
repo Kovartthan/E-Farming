@@ -33,7 +33,7 @@ public class HomeActivity extends BaseActivity {
     protected TabsPagerAdapter mAdapter;
     protected TabLayout tabLayout;
     private Toolbar toolbar;
-
+    private boolean isFirstOpen;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -90,10 +90,16 @@ public class HomeActivity extends BaseActivity {
 
             @Override
             public void onPageSelected(int position) {
-                if(position == 0)
+                if(position == 0) {
                     floatingActionButton.setVisibility(View.VISIBLE);
-                else
+                    chatListFragment.clearData();
+                } else {
                     floatingActionButton.setVisibility(View.INVISIBLE);
+                    if(isFirstOpen) {
+                        chatListFragment.reInit();
+                    }
+                    isFirstOpen = true;
+                }
             }
 
             @Override
