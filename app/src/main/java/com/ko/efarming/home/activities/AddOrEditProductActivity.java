@@ -4,25 +4,23 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -94,6 +92,7 @@ public class AddOrEditProductActivity extends BaseActivity {
     private TextInputLayout productNameLayout;
     private TextInputLayout productQuantityLayout;
     private TextInputLayout productPriceLayout;
+    private ProgressDialog progressDialog;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -153,6 +152,8 @@ public class AddOrEditProductActivity extends BaseActivity {
         productNameLayout = findViewById(R.id.name_layout);
         productPriceLayout = findViewById(R.id.product_price_layout);
         productQuantityLayout = findViewById(R.id.product_quan_layout);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
     }
 
     private void setupDefault() {
@@ -165,14 +166,11 @@ public class AddOrEditProductActivity extends BaseActivity {
 
     private void loadCompanyData() {
 
-        if (efProgressDialog != null)
-            efProgressDialog.show();
+        progressDialog.show();
 
         getCompanyName();
 
     }
-
-
 
 
     private void getIntentData() {
@@ -190,7 +188,7 @@ public class AddOrEditProductActivity extends BaseActivity {
             edtProductQuantity.setText(editProductInfo.productQuantity);
             edtProductPrice.setText(editProductInfo.productPrice);
             if (!com.ko.efarming.util.TextUtils.isNullOrEmpty(editProductInfo.imageUrl)) {
-                Picasso.with(this).load(editProductInfo.imageUrl).into(imgProductPhoto);
+                Picasso.get().load(editProductInfo.imageUrl).into(imgProductPhoto);
                 imagerls = editProductInfo.imageUrl;
             }
         }
@@ -219,6 +217,8 @@ public class AddOrEditProductActivity extends BaseActivity {
     public void onBackPressed() {
         if (!isEdit) {
             exitRevealAction();
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -254,9 +254,7 @@ public class AddOrEditProductActivity extends BaseActivity {
         imgMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!isEdit) {
-                    exitRevealAction();
-                }
+                onBackPressed();
             }
         });
         findViewById(R.id.photo_layout).setOnClickListener(new View.OnClickListener() {
@@ -272,9 +270,9 @@ public class AddOrEditProductActivity extends BaseActivity {
                 }
             }
         });
-        addTextChangeListener(edtProductName,productNameLayout);
-        addTextChangeListener(edtProductPrice,productPriceLayout);
-        addTextChangeListener(edtProductQuantity,productQuantityLayout);
+        addTextChangeListener(edtProductName, productNameLayout);
+        addTextChangeListener(edtProductPrice, productPriceLayout);
+        addTextChangeListener(edtProductQuantity, productQuantityLayout);
     }
 
     @Override
@@ -386,6 +384,24 @@ public class AddOrEditProductActivity extends BaseActivity {
             return;
         }
 
+        if (edtProductName.getText().length() < 3) {
+            productNameLayout.setError("Enter a valid product name");
+            productNameLayout.setErrorEnabled(true);
+            return;
+        }
+
+        if (edtProductQuantity.getText().toString().equalsIgnoreCase("0")) {
+            productQuantityLayout.setError("Quantity can't be 0");
+            productQuantityLayout.setErrorEnabled(true);
+            return;
+        }
+
+        if (edtProductPrice.getText().toString().equalsIgnoreCase("0")) {
+            productPriceLayout.setError("Price can't be 0");
+            productPriceLayout.setErrorEnabled(true);
+            return;
+        }
+
         doAddProduct();
     }
 
@@ -408,8 +424,6 @@ public class AddOrEditProductActivity extends BaseActivity {
             updateProductInfoOnDb();
         else
             addProductInfoToUsersDatabase();
-
-
 
 
     }
@@ -480,11 +494,9 @@ public class AddOrEditProductActivity extends BaseActivity {
                 .child(key).child(Constants.COMPANY_INFO).setValue(companyInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful())
-                {
+                if (task.isSuccessful()) {
                     addUserInfoForChatInDb(key);
-
-                }else{
+                } else {
                     Toast.makeText(AddOrEditProductActivity.this, "Product not added, please try again", Toast.LENGTH_LONG).show();
                 }
             }
@@ -498,7 +510,7 @@ public class AddOrEditProductActivity extends BaseActivity {
                 .child(key).child(Constants.USERS_INFO).setValue(userDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()) {
+                if (task.isSuccessful()) {
                     if (isAddedDbPrivate && isAddedDbPublic) {
                         if (efProgressDialog != null)
                             efProgressDialog.dismiss();
@@ -506,7 +518,7 @@ public class AddOrEditProductActivity extends BaseActivity {
                         setResult(RESULT_OK);
                         finish();
                     }
-                }else{
+                } else {
                     Toast.makeText(AddOrEditProductActivity.this, "Product not added, please try again", Toast.LENGTH_LONG).show();
                 }
             }
@@ -589,7 +601,6 @@ public class AddOrEditProductActivity extends BaseActivity {
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                efProgressDialog.dismiss();
                 companyInfo = dataSnapshot.getValue(CompanyInfo.class);
                 getUserInfo();
             }
@@ -598,11 +609,10 @@ public class AddOrEditProductActivity extends BaseActivity {
             public void onCancelled(DatabaseError databaseError) {
                 efProgressDialog.dismiss();
                 exitRevealAction();
-                Toast.makeText(AddOrEditProductActivity.this,"Cant connect to Database, please try again ",Toast.LENGTH_LONG).show();
+                Toast.makeText(AddOrEditProductActivity.this, "Cant connect to Database, please try again ", Toast.LENGTH_LONG).show();
             }
         });
     }
-
 
 
     private void updateProductInfoOnDb() {
@@ -620,9 +630,7 @@ public class AddOrEditProductActivity extends BaseActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             isAddedDbPrivate = true;
-
                             Uri mImageUri = Uri.fromFile(new File(imagePathForFireBase));
-
                             if (!TextUtils.isEmpty(imagePathForFireBase)) {
                                 StorageReference filepath = getApp().getFireBaseStorage().getReference().child("product_photo").child(imagePathForFireBase);
                                 filepath.putFile(mImageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -656,14 +664,17 @@ public class AddOrEditProductActivity extends BaseActivity {
                                                     .child(Constants.COMPANY_INFO)
                                                     .child(Constants.PRODUCT_INFO)
                                                     .child(editProductInfo.productID).child("imageUrl").setValue(imagerls);
+                                            updateProductInfoToPublic(editProductInfo.productID, imagerls);
+                                        } else {
+                                            updateProductInfoToPublic(editProductInfo.productID);
                                         }
                                     }
 
                                 });
-
                             } else {
+                                updateProductInfoToPublic(editProductInfo.productID);
                             }
-                            updateProductInfoToPublic(editProductInfo.productID);
+
                         } else {
                             isAddedDbPrivate = false;
                         }
@@ -720,7 +731,109 @@ public class AddOrEditProductActivity extends BaseActivity {
                                 });
 
                             } else {
+
                             }
+                            updateCompanyInfoIntoProduct(key,imagerls);
+                        } else {
+                            isAddedDbPublic = false;
+                        }
+                    }
+                });
+    }
+
+    private void updateCompanyInfoIntoProduct(final String key, final String imagerls) {
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.PRODUCT_INFO)
+                .child(key).child(Constants.COMPANY_INFO).setValue(companyInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    updateProductInfoInAllChat(key,imagerls);
+                    updateUserInfoForChatInDb(key,imagerls);
+                } else {
+                    Toast.makeText(AddOrEditProductActivity.this, "Product not edited, please try again", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private void updateUserInfoForChatInDb(final String key, final String imagerls) {
+
+        FirebaseDatabase.getInstance().getReference().removeEventListener(productInfoChatValueEventListener);
+
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.PRODUCT_INFO)
+                .child(key).child(Constants.USERS_INFO).setValue(userDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    if (isAddedDbPrivate && isAddedDbPublic) {
+                        efProgressDialog.dismiss();
+                        Toast.makeText(AddOrEditProductActivity.this, "Product edited successfully", Toast.LENGTH_LONG).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    } else {
+                        Toast.makeText(AddOrEditProductActivity.this, "Product not edited, please try again", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(AddOrEditProductActivity.this, "Product not edited, please try again", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private ValueEventListener productInfoChatValueEventListener;
+
+    private void updateProductInfoInAllChat(final String key, final String imagerls){
+        final DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.USERS)
+                .child(getApp().getFireBaseAuth().getCurrentUser().getUid()).child("all_chats").child(key);
+
+        productInfoChatValueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot:dataSnapshot.getChildren()){
+                    if(snapshot.hasChild("detail_info")){
+                        if(!TextUtils.isEmpty(imagerls))
+                            databaseReference.child(snapshot.getKey()).child("detail_info").child("imageUrl").setValue(imagerls);
+                        databaseReference.child(snapshot.getKey()).child("detail_info").child("productName").setValue(edtProductName.getText().toString());
+                        databaseReference.child(snapshot.getKey()).child("detail_info").child("productPrice").setValue(edtProductPrice.getText().toString());
+                        databaseReference.child(snapshot.getKey()).child("detail_info").child("productQuantity").setValue(edtProductQuantity.getText().toString());
+                    }
+                }
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateUserInfoForChatInDb(key,imagerls);
+                    }
+                },300);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        databaseReference.addListenerForSingleValueEvent(productInfoChatValueEventListener);
+    }
+
+
+    private void updateProductInfoToPublic(final String key, String imageUrl) {
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imageUrl, key);
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.PRODUCT_INFO)
+                .child(key)
+                .setValue(productInfo)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            isAddedDbPublic = true;
                             FirebaseDatabase.getInstance()
                                     .getReference()
                                     .child(Constants.PRODUCT_INFO)
@@ -745,15 +858,14 @@ public class AddOrEditProductActivity extends BaseActivity {
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                efProgressDialog.dismiss();
+                progressDialog.dismiss();
                 userDetails = dataSnapshot.getValue(User.class);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                efProgressDialog.dismiss();
                 exitRevealAction();
-                Toast.makeText(AddOrEditProductActivity.this,"Cant connect to Database, please try again ",Toast.LENGTH_LONG).show();
+                Toast.makeText(AddOrEditProductActivity.this, "Cant connect to Database, please try again ", Toast.LENGTH_LONG).show();
             }
         });
     }

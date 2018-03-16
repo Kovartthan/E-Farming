@@ -2,20 +2,15 @@ package com.ko.efarming.home.activities;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,10 +24,9 @@ import com.ko.efarming.home.adapters.ChatRecyclerAdapter;
 import com.ko.efarming.model.Chat;
 import com.ko.efarming.model.ProductInfo;
 import com.ko.efarming.model.User;
-import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
 import com.ko.efarming.util.TextUtils;
-
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -104,7 +98,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Tex
         findViewById(R.id.img_menu).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              onBackPressed();
+                onBackPressed();
             }
         });
 
@@ -115,7 +109,8 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Tex
             user = (User) getIntent().getSerializableExtra("user");
             txtChatUserName.setText(user.email);
             txtRequestFor.setText("Online");
-            Glide.with(this).load(user.userImage).into(imgProfile);
+            if (!TextUtils.isNullOrEmpty(user.userImage))
+                Picasso.get().load(user.userImage).placeholder(R.drawable.ic_account_circle_black_48dp).into(imgProfile);
         }
     }
 

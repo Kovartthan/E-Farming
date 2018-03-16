@@ -365,7 +365,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                         if (task.isSuccessful()) {
                             isAddedDbPublic = true;
                             putCityIntoDB();
-                            redirectToHomeScreen();
+//                            redirectToHomeScreen();
                         } else {
                             isAddedDbPublic = false;
                         }
@@ -456,6 +456,11 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
 
     private void putCityIntoDB(){
         String key = FirebaseDatabase.getInstance().getReference().push().getKey();
-        FirebaseDatabase.getInstance().getReference().child("location_filter").child(key).setValue(city);
+        FirebaseDatabase.getInstance().getReference().child("location_filter").child(key).setValue(city).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                redirectToHomeScreen();
+            }
+        });
     }
 }

@@ -7,6 +7,7 @@ import android.support.design.widget.TabLayout;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -92,13 +93,13 @@ public class HomeActivity extends BaseActivity {
             public void onPageSelected(int position) {
                 if(position == 0) {
                     floatingActionButton.setVisibility(View.VISIBLE);
-                    chatListFragment.clearData();
+//                    chatListFragment.clearDataIfExists();
                 } else {
                     floatingActionButton.setVisibility(View.INVISIBLE);
-                    if(isFirstOpen) {
-                        chatListFragment.reInit();
-                    }
-                    isFirstOpen = true;
+//                    if(isFirstOpen) {
+//                        chatListFragment.reInit();
+//                    }
+//                    isFirstOpen = true;
                 }
             }
 

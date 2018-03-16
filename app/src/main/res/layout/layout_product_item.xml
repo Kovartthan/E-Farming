@@ -17,11 +17,11 @@
             android:background="@color/background_grey">
 
             <TextView
+                android:id="@+id/txt_preview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:drawablePadding="5dp"
-                android:visibility="gone"
                 android:drawableTop="@drawable/ic_photo_green_24dp"
                 android:gravity="center_horizontal"
                 android:text="@string/no_image_available"
