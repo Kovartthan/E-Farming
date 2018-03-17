@@ -162,6 +162,7 @@ public class AddressFetchActivity extends BaseActivity implements OnMapReadyCall
                 }
             }
         });
+
     }
 
     @Override

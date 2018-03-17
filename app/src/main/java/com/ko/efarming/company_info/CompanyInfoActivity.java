@@ -15,12 +15,19 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -52,6 +59,7 @@ import static com.ko.efarming.util.Constants.GET_ADDRESS;
 import static com.ko.efarming.util.Constants.GET_LATITUDE;
 import static com.ko.efarming.util.Constants.GET_LONGITUDE;
 import static com.ko.efarming.util.Constants.PERMISSIONS;
+import static com.ko.efarming.util.Constants.PLACE_AUTOCOMPLETE_REQUEST_CODE;
 import static com.ko.efarming.util.Constants.RC_ADDRESS;
 import static com.ko.efarming.util.Constants.RC_CITY;
 import static com.ko.efarming.util.Constants.RC_MARSH_MALLOW_LOCATION_PERMISSION;
@@ -119,9 +127,22 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                         putLong = data.getDoubleExtra(GET_LONGITUDE, 0);
                     }
                     if(data.hasExtra(RC_CITY)){
-                        city = data.getStringExtra(RC_CITY);
+//                        city = data.getStringExtra(RC_CITY);
                     }
                 }
+            }
+        }
+        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(this, data);
+                city = place.getName().toString();
+                edtCmyEmail.setText(place.getName().toString());
+                Log.i("TAG", "Place: " + place.getName());
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+                Log.i("TAG", status.getStatusMessage());
+            } else if (resultCode == RESULT_CANCELED) {
+                Log.i("TAG", "RESULT_CANCELED");
             }
         }
     }
@@ -212,6 +233,25 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                 } else {
                     cameraUtils.promptMediaOption();
                 }
+            }
+        });
+        edtCmyEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = null;
+                AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                        .setCountry("IN")
+                        .setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES)
+                        .build();
+                try {
+                    intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN).setFilter(typeFilter)
+                            .build(CompanyInfoActivity.this);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+                startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
             }
         });
     }
@@ -311,6 +351,11 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
             cmpanyNameLayout.setError("Enter your name");
             cmpanyNameLayout.setErrorEnabled(true);
             return;
+        }
+
+        if(TextUtils.isEmpty(edtCmyEmail.getText())){
+            emailLayout.setError("Select your city");
+            emailLayout.setErrorEnabled(true);
         }
 
         if (TextUtils.isEmpty(edtCmyPhone.getText())) {

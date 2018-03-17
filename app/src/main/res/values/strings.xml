@@ -32,7 +32,7 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="name">Name</string>
     <string name="company_name">Company Name</string>
-    <string name="company_email">Company Email</string>
+    <string name="company_email">City</string>
     <string name="contact_number">Contact Number</string>
     <string name="add_your_company_photo">Add your company photo</string>
     <string name="company_address">Company Address</string>

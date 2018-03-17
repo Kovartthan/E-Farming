@@ -39,4 +39,5 @@ public interface Constants {
     public static final int REQUEST_USE_FINGERPRINT = 300;
     public static final String RC_CITY = "city";
     public String ONLINE_STATUS = "online_status";
+    public int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1200;
 }

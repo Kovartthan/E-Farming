@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -22,11 +22,11 @@
     <application
         android:name=".EFApp"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher_new"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -59,12 +59,10 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".home.activities.HomeActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeHome" />
-
         <activity
             android:name="com.soundcloud.android.crop.CropImageActivity"
             android:screenOrientation="portrait" />
@@ -85,15 +83,15 @@
         <activity
             android:name=".company_info.AddressFetchActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".home.activities.AddOrEditProductActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".home.activities.ChatActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
