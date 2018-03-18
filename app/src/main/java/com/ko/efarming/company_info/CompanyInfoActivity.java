@@ -244,7 +244,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                         .setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES)
                         .build();
                 try {
-                    intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN).setFilter(typeFilter)
+                    intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).setFilter(typeFilter)
                             .build(CompanyInfoActivity.this);
                 } catch (GooglePlayServicesRepairableException e) {
                     e.printStackTrace();
@@ -397,7 +397,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
 
     }
 
-    private void addCompanyInfoToPublic() {
+    private void addCompanyInfoToPublic(String imagerls) {
         CompanyInfoPublic companyInfo = new CompanyInfoPublic(edtCmyName.getText().toString(), edtCmyEmail.getText().toString(), edtCmyPhone.getText().toString(), edtCmyLocation.getText().toString(), imagerls, putLat, putLong);
         FirebaseDatabase.getInstance()
                 .getReference()
@@ -461,6 +461,9 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                                                     .getReference(Constants.USERS)
                                                     .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
                                                     .child(Constants.COMPANY_INFO).child("imageUrl").setValue(imagerls);
+                                            addCompanyInfoToPublic(imagerls);
+                                        }else{
+                                            addCompanyInfoToPublic("");
                                         }
 //                                        redirectToHomeScreen();
                                     }
@@ -469,8 +472,9 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
 
                             } else {
 //                                redirectToHomeScreen();
+                                addCompanyInfoToPublic("");
                             }
-                            addCompanyInfoToPublic();
+
                         } else {
                             isAddedDbPrivate = false;
                         }

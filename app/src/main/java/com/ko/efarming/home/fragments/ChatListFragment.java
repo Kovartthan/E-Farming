@@ -40,6 +40,7 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
     private boolean isPause;
     private ArrayList<ProductInfo> productInfoArrayList;
     ArrayList<ChatListBean> chatListBeanArrayList;
+
     public ChatListFragment() {
 
     }
@@ -111,7 +112,7 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
             }
         };
 
-        databaseReference.addListenerForSingleValueEvent(productInfoListener);
+        databaseReference.addValueEventListener(productInfoListener);
     }
 
 
@@ -142,7 +143,7 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
 
     }
 
-    private ValueEventListener chatUserListeener ;
+    private ValueEventListener chatUserListeener;
 
     private void getChatUserInfo(final String key, final ProductInfo productInfo) {
         chatUserListeener = new ValueEventListener() {
@@ -159,7 +160,7 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
             }
         };
         FirebaseDatabase.getInstance()
-                .getReference().child("client_users").child(key).addListenerForSingleValueEvent(chatUserListeener);
+                .getReference().child("client_users").child(key).addValueEventListener(chatUserListeener);
 
     }
 
@@ -180,7 +181,9 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
 //            chatListAdapter.updateList(chatList);
 //            getChatsList();
 //            getProductInfo();
-            isPause = true;
+//            getApp().getFireBaseDataBase().addValueEventListener(chatUserListeener);
+//            getApp().getFireBaseDataBase().addValueEventListener(productInfoListener);
+            isPause = false;
         }
     }
 
@@ -188,6 +191,10 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
     public void onPause() {
         super.onPause();
         isPause = true;
+//        if (chatUserListeener != null)
+//            getApp().getFireBaseDataBase().removeEventListener(chatUserListeener);
+//        if (productInfoListener != null)
+//            getApp().getFireBaseDataBase().removeEventListener(productInfoListener);
     }
 
     public void clearDataIfExists() {
@@ -201,10 +208,9 @@ public class ChatListFragment extends Fragment implements OnChatOpenListener {
             getApp().getFireBaseDataBase().removeEventListener(chatUserListeener);
     }
 
-    public void reInit(){
+    public void reInit() {
         getProductInfo();
     }
-
 
 
 }

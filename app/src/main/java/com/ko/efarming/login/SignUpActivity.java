@@ -25,6 +25,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -85,7 +86,7 @@ public class SignUpActivity extends BaseActivity {
     private boolean isFingerPrintEnabled;
     private RadioGroup radioGroup;
     private FingerprintManager fingerprintManager;
-
+    private CheckedTextView checkedTextView;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -144,13 +145,14 @@ public class SignUpActivity extends BaseActivity {
         mConfirmPass = findViewById(R.id.conf_password);
         cameraUtils = new CameraUtils(this, SignUpActivity.this);
         radioGroup = findViewById(R.id.rg_fingerprint);
+        checkedTextView = findViewById(R.id.txt_fingerprint);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
             if (!fingerprintManager.isHardwareDetected()) {
-                radioGroup.setVisibility(View.INVISIBLE);
+                checkedTextView.setVisibility(View.INVISIBLE);
             }
         } else {
-            radioGroup.setVisibility(View.INVISIBLE);
+            checkedTextView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -227,15 +229,19 @@ public class SignUpActivity extends BaseActivity {
             }
         });
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        checkedTextView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.rb_yes)
-                    isFingerPrintEnabled = true;
-                else
+            public void onClick(View v) {
+                if(checkedTextView.isChecked()){
                     isFingerPrintEnabled = false;
+                    checkedTextView.setChecked(false);
+                }else{
+                    isFingerPrintEnabled = true;
+                    checkedTextView.setChecked(true);
+                }
             }
         });
+
     }
 
 

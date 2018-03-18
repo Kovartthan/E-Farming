@@ -5,22 +5,9 @@
     tools:context=".activity.MainActivity">
 
     <group>
-
-        <item
-            android:id="@+id/settings_exit"
-            android:title="Settings"
-            app:showAsAction="never" />
-
-        <item
-            android:id="@+id/about"
-            android:title="About"
-            app:showAsAction="never" />
-
-
         <item
             android:id="@+id/action_sign_out"
             android:title="Log out"
             app:showAsAction="never" />
-
     </group>
 </menu>

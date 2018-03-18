@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public class CompanyInfo implements Serializable{
     public String name;
-    public String email;
+    public String city;
     public String phone;
     public String location;
 
@@ -16,9 +16,9 @@ public class CompanyInfo implements Serializable{
 
     }
 
-    public CompanyInfo(String name, String email, String phone, String location) {
+    public CompanyInfo(String name, String city, String phone, String location) {
         this.name = name;
-        this.email = email;
+        this.city = city;
         this.phone = phone;
         this.location = location;
     }

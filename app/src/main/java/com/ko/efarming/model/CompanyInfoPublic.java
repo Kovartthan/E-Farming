@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public class CompanyInfoPublic implements Serializable {
         public String name;
-        public String email;
+        public String city;
         public String phone;
         public String location;
         public String photoUrl;
@@ -17,9 +17,9 @@ public class CompanyInfoPublic implements Serializable {
 
         }
 
-        public CompanyInfoPublic(String name, String email, String phone, String location, String photoUrl,double latitude,double longitude) {
+        public CompanyInfoPublic(String name, String city, String phone, String location, String photoUrl,double latitude,double longitude) {
             this.name = name;
-            this.email = email;
+            this.city = city;
             this.phone = phone;
             this.location = location;
             this.photoUrl = photoUrl;

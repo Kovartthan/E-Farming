@@ -67,7 +67,7 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
     private FingerprintManager fingerprintManager;
     private KeyguardManager keyguardManager;
     private Button txtFingerPrint;
-
+    private TextView txtOr;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,19 +100,26 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
         emailLayout = findViewById(R.id.email_layout);
         passwordLayout = findViewById(R.id.password_layout);
         txtFingerPrint = findViewById(R.id.btn_fingerprint);
+        txtOr = findViewById(R.id.txt_or);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
             keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             fingerPrintUtils = new FingerPrintUtils(this, this, fingerprintManager, keyguardManager);
-            fingerprintHandler = new FingerprintHandler(this);
-            fingerprintHandler.setOnFingerPrintAuthenticationListener(this);
-            cipher = fingerPrintUtils.instantiateCipher();
-            if (cipher != null) {
-                cryptoObject = new FingerprintManager.CryptoObject(cipher);
+            if(fingerPrintUtils.checkDeviceFingerprintSupport()) {
+                fingerprintHandler = new FingerprintHandler(this);
+                fingerprintHandler.setOnFingerPrintAuthenticationListener(this);
+                cipher = fingerPrintUtils.instantiateCipher();
+                if (cipher != null) {
+                    cryptoObject = new FingerprintManager.CryptoObject(cipher);
+                }
+            }else{
+                txtFingerPrint.setVisibility(View.GONE);
+                txtOr.setVisibility(View.GONE);
             }
         } else {
-            txtFingerPrint.setVisibility(View.INVISIBLE);
+            txtFingerPrint.setVisibility(View.GONE);
+            txtOr.setVisibility(View.GONE);
         }
 
     }
@@ -210,7 +217,7 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
-                txtFingerPrint.setText("Place your finger");
+                txtFingerPrint.setText("Touch your Sensor");
                 fingerprintHandler.completeFingerAuthentication(fingerprintManager, cryptoObject);
             }
         });
@@ -330,17 +337,21 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
 
     @Override
     public void onFingerPrintAuthenticationError(String error) {
-        Toast.makeText(this, "FIngerprint Authentication failed" + error, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Fingerprint Authentication failed" + error, Toast.LENGTH_SHORT).show();
         txtFingerPrint.setText("Use fingerprint");
     }
 
     @Override
     public void onFingerPrintAuthenticationSucceeded() {
+        Toast.makeText(this,"onFingerPrintAuthenticationSucceeded",Toast.LENGTH_SHORT).show();
         fetchLoginDetails();
+        getApp().getFireBaseDataBase().removeEventListener(fingerPrintListener);
     }
 
+    private ValueEventListener fingerPrintListener;
+
     private void fetchLoginDetails() {
-        getApp().getFireBaseDataBase().child("fingerprint").addValueEventListener(new ValueEventListener() {
+        fingerPrintListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -354,7 +365,8 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
             public void onCancelled(DatabaseError databaseError) {
                 Log.e("Fingerprint","error "+ databaseError.getMessage());
             }
-        });
+        };
+        getApp().getFireBaseDataBase().child("fingerprint").addValueEventListener(fingerPrintListener);
     }
 
     private void getUserInfo(String uid) {
@@ -377,7 +389,7 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
 
     @Override
     public void onFingerPrintAuthenticationFailed() {
-        Toast.makeText(this, "FIngerprint Authentication failed", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Fingerprint Authentication failed", Toast.LENGTH_SHORT).show();
         txtFingerPrint.setText("Use fingerprint");
     }
 }

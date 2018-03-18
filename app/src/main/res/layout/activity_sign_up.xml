@@ -154,10 +154,26 @@
 
                     </android.support.design.widget.TextInputLayout>
 
+                    <CheckedTextView
+                        android:id="@+id/txt_fingerprint"
+                        android:layout_marginTop="15dp"
+                        android:textSize="12sp"
+                        android:gravity="center_vertical"
+                        android:drawablePadding="10dp"
+                        android:drawableLeft="@drawable/check_box"
+                        android:textColor="@color/colorPrimary"
+                        android:checked="false"
+                        android:text="Use FingerPrint"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
                     <RadioGroup
                         android:id="@+id/rg_fingerprint"
                         android:layout_marginTop="10dp"
                         android:weightSum="2"
+                        android:visibility="gone"
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">

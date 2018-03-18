@@ -51,7 +51,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         ((MyChatViewHolder) holder).txtChatUserName.setText(TextUtils.capitalizeFirstLetter(chatList.get(position).user.email));
         ((MyChatViewHolder) holder).txtRequestFor.setText("Requested for the product : " + TextUtils.capitalizeFirstLetter(chatList.get(position).productInfo.productName));
         if (!TextUtils.isNullOrEmpty(chatList.get(position).user.userImage)) {
-            Picasso.get().load(productBean.user.userImage).into(((MyChatViewHolder) holder).imgProfile);
+//            Picasso.get().load(productBean.user.userImage).into(((MyChatViewHolder) holder).imgProfile);
         }
         ((MyChatViewHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
             @Override

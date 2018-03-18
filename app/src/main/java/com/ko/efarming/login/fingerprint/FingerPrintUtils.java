@@ -54,20 +54,26 @@ public class FingerPrintUtils {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void checkDeviceFingerprintSupport() {
+    public boolean checkDeviceFingerprintSupport() {
+        boolean isSupported = true;
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.USE_FINGERPRINT}, REQUEST_USE_FINGERPRINT);
+            isSupported = false;
         } else {
             if (!fingerprintManager.isHardwareDetected()) {
                 Toast.makeText(context, "Fingerprint is not supported in this device", Toast.LENGTH_LONG).show();
+                isSupported = false;
             }
             if (!fingerprintManager.hasEnrolledFingerprints()) {
                 Toast.makeText(context, "Fingerprint not yet configured", Toast.LENGTH_LONG).show();
+                isSupported = false;
             }
             if (!keyguardManager.isKeyguardSecure()) {
                 Toast.makeText(context, "Screen lock is not secure and enable", Toast.LENGTH_LONG).show();
+                isSupported = false;
             }
         }
+        return isSupported;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
