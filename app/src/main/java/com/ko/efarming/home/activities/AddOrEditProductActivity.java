@@ -429,7 +429,7 @@ public class AddOrEditProductActivity extends BaseActivity {
     }
 
     private void addProductInfoToPublic(final String key) {
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.PRODUCT_INFO)
@@ -533,7 +533,7 @@ public class AddOrEditProductActivity extends BaseActivity {
                 .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
                 .child(Constants.COMPANY_INFO)
                 .child(Constants.PRODUCT_INFO).push().getKey();
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)
@@ -616,7 +616,7 @@ public class AddOrEditProductActivity extends BaseActivity {
 
 
     private void updateProductInfoOnDb() {
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, editProductInfo.productID);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, editProductInfo.productID,0,0);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)
@@ -683,7 +683,7 @@ public class AddOrEditProductActivity extends BaseActivity {
     }
 
     private void updateProductInfoToPublic(final String key) {
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.PRODUCT_INFO)
@@ -823,7 +823,7 @@ public class AddOrEditProductActivity extends BaseActivity {
 
 
     private void updateProductInfoToPublic(final String key, String imageUrl) {
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imageUrl, key);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imageUrl, key,0,0);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.PRODUCT_INFO)
