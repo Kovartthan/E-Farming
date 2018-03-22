@@ -11,15 +11,16 @@ public class CompanyInfo implements Serializable{
     public String city;
     public String phone;
     public String location;
-
+    public String companyType;
     public CompanyInfo(){
 
     }
 
-    public CompanyInfo(String name, String city, String phone, String location) {
+    public CompanyInfo(String name, String city, String phone, String location,String companyType) {
         this.name = name;
         this.city = city;
         this.phone = phone;
         this.location = location;
+        this.companyType = companyType;
     }
 }

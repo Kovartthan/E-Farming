@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -86,6 +87,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
     private double putLat, putLong;
     private boolean isPermissionFlag = false;
     private String city;
+    private String companyType = "Retailer";
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -254,6 +256,18 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
                 startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
             }
         });
+        ((RadioGroup)findViewById(R.id.rg_shop_type)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int radioPosition) {
+                if(radioPosition == R.id.rb_retailer){
+                    companyType = "Retailer";
+                }else if(radioPosition == R.id.rb_wholesale){
+                    companyType = "Wholesaler";
+                }else if(radioPosition == R.id.rb_dealer){
+                    companyType = "Dealer";
+                }
+            }
+        });
     }
 
     @Override
@@ -398,7 +412,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
     }
 
     private void addCompanyInfoToPublic(String imagerls) {
-        CompanyInfoPublic companyInfo = new CompanyInfoPublic(edtCmyName.getText().toString(), edtCmyEmail.getText().toString(), edtCmyPhone.getText().toString(), edtCmyLocation.getText().toString(), imagerls, putLat, putLong);
+        CompanyInfoPublic companyInfo = new CompanyInfoPublic(edtCmyName.getText().toString(), edtCmyEmail.getText().toString(), edtCmyPhone.getText().toString(), edtCmyLocation.getText().toString(), imagerls, putLat, putLong,companyType);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.COMPANY_INFO)
@@ -419,7 +433,7 @@ public class CompanyInfoActivity extends BaseActivity implements AppBarLayout.On
     }
 
     private void addCompanyInfoToUsersDatabase() {
-        CompanyInfo companyInfo = new CompanyInfo(edtCmyName.getText().toString(), edtCmyEmail.getText().toString(), edtCmyPhone.getText().toString(), edtCmyLocation.getText().toString());
+        CompanyInfo companyInfo = new CompanyInfo(edtCmyName.getText().toString(), edtCmyEmail.getText().toString(), edtCmyPhone.getText().toString(), edtCmyLocation.getText().toString(),companyType);
         FirebaseDatabase.getInstance()
                 .getReference(Constants.USERS)
                 .child(getApp().getFireBaseAuth().getCurrentUser().getUid())

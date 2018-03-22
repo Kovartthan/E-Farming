@@ -13,11 +13,12 @@ public class CompanyInfoPublic implements Serializable {
         public String location;
         public String photoUrl;
         public double latitude,longitude;
+        public String companyType;
         public CompanyInfoPublic(){
 
         }
 
-        public CompanyInfoPublic(String name, String city, String phone, String location, String photoUrl,double latitude,double longitude) {
+        public CompanyInfoPublic(String name, String city, String phone, String location, String photoUrl,double latitude,double longitude,  String companyType) {
             this.name = name;
             this.city = city;
             this.phone = phone;
@@ -25,5 +26,6 @@ public class CompanyInfoPublic implements Serializable {
             this.photoUrl = photoUrl;
             this.latitude = latitude;
             this.longitude = longitude;
+            this.companyType = companyType;
         }
 }
