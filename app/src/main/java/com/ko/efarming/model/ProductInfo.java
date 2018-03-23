@@ -16,18 +16,18 @@ public class ProductInfo implements Serializable {
     public String productID;
     public CompanyInfoPublic company_info;
     public User user_info;
-    public int rating;
+    public int overallRating;
     public int ratingNoOfPerson;
     public ProductInfo(){
 
     }
-    public ProductInfo(String productName, String productQuantity, String productPrice,String imageUrl,String productID,int rating,int ratingNoOfPerson) {
+    public ProductInfo(String productName, String productQuantity, String productPrice,String imageUrl,String productID,int overallRating,int ratingNoOfPerson) {
         this.productName = productName;
         this.productQuantity = productQuantity;
         this.productPrice = productPrice;
         this.imageUrl = imageUrl;
         this.productID = productID;
-        this.rating = rating;
+        this.overallRating = overallRating;
         this.ratingNoOfPerson = ratingNoOfPerson;
     }
 }
