@@ -109,7 +109,7 @@ public class AddOrEditProductActivity extends BaseActivity {
                 File f = TempManager.getTempPictureFile(this);
                 if (f != null) {
                     String path = f.getAbsolutePath();
-                    imagePathForFireBase = path;
+
 
                     CompressImage compressImage = new CompressImage(this);
                     path = compressImage.compressImage(path);
@@ -117,6 +117,7 @@ public class AddOrEditProductActivity extends BaseActivity {
 
                     imagPaths = new String[]{path};
                     File file = new File(imagPaths[0]);
+                    imagePathForFireBase = file.getAbsolutePath();
                     if (file.exists()) {
                         cameraUtils.startCrop(file.getAbsolutePath());
                     }
@@ -429,7 +430,7 @@ public class AddOrEditProductActivity extends BaseActivity {
     }
 
     private void addProductInfoToPublic(final String key) {
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0,null);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.PRODUCT_INFO)
@@ -485,6 +486,7 @@ public class AddOrEditProductActivity extends BaseActivity {
                         }
                     }
                 });
+
     }
 
     private void addCompanyInfoIntoProduct(final String key) {
@@ -533,7 +535,7 @@ public class AddOrEditProductActivity extends BaseActivity {
                 .child(getApp().getFireBaseAuth().getCurrentUser().getUid())
                 .child(Constants.COMPANY_INFO)
                 .child(Constants.PRODUCT_INFO).push().getKey();
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0,null);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)
@@ -616,7 +618,7 @@ public class AddOrEditProductActivity extends BaseActivity {
 
 
     private void updateProductInfoOnDb() {
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, editProductInfo.productID,0,0);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, editProductInfo.productID,0,0,null);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.USERS)
@@ -683,7 +685,7 @@ public class AddOrEditProductActivity extends BaseActivity {
     }
 
     private void updateProductInfoToPublic(final String key) {
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imagerls, key,0,0,null);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.PRODUCT_INFO)
@@ -823,7 +825,7 @@ public class AddOrEditProductActivity extends BaseActivity {
 
 
     private void updateProductInfoToPublic(final String key, String imageUrl) {
-        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imageUrl, key,0,0);
+        ProductInfo productInfo = new ProductInfo(edtProductName.getText().toString(), edtProductQuantity.getText().toString(), edtProductPrice.getText().toString(), imageUrl, key,0,0,null);
         FirebaseDatabase.getInstance()
                 .getReference()
                 .child(Constants.PRODUCT_INFO)
