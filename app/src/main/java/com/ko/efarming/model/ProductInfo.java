@@ -18,10 +18,11 @@ public class ProductInfo implements Serializable {
     public User user_info;
     public int rating;
     public int ratingNoOfPerson;
+    public Object userRating;
     public ProductInfo(){
 
     }
-    public ProductInfo(String productName, String productQuantity, String productPrice,String imageUrl,String productID,int rating,int ratingNoOfPerson) {
+    public ProductInfo(String productName, String productQuantity, String productPrice,String imageUrl,String productID,int rating,int ratingNoOfPerson,Object userRating) {
         this.productName = productName;
         this.productQuantity = productQuantity;
         this.productPrice = productPrice;
@@ -29,5 +30,6 @@ public class ProductInfo implements Serializable {
         this.productID = productID;
         this.rating = rating;
         this.ratingNoOfPerson = ratingNoOfPerson;
+        this.userRating = userRating;
     }
 }
