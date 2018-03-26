@@ -408,6 +408,7 @@ public class SignUpActivity extends BaseActivity {
 
         if (efProgressDialog != null)
             efProgressDialog.show();
+
         getApp().getFireBaseAuth().createUserWithEmailAndPassword(mEmailView.getText().toString(), mPasswordView.getText().toString())
                 .addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
