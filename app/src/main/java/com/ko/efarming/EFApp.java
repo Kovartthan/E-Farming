@@ -79,4 +79,14 @@ public class EFApp extends Application {
     public AppPreference getAppPreference() {
         return mSharedPreferences;
     }
+
+    private static boolean sIsChatActivityOpen = false;
+
+    public static boolean isChatActivityOpen() {
+        return sIsChatActivityOpen;
+    }
+
+    public static void setChatActivityOpen(boolean isChatActivityOpen) {
+        EFApp.sIsChatActivityOpen = isChatActivityOpen;
+    }
 }

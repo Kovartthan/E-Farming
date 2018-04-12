@@ -33,7 +33,9 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.company_info.CompanyInfoActivity;
@@ -44,6 +46,7 @@ import com.ko.efarming.login.fingerprint.OnFingerPrintAuthenticationListener;
 import com.ko.efarming.model.User;
 import com.ko.efarming.util.Constants;
 import com.ko.efarming.util.DeviceUtils;
+import com.ko.efarming.util.SharedPrefUtil;
 
 import javax.crypto.Cipher;
 
@@ -273,7 +276,7 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
         getApp().getFireBaseAuth().signInWithEmailAndPassword(mEmailView.getText().toString(), mPasswordView.getText().toString())
                 .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    public void onComplete(@NonNull final Task<AuthResult> task) {
                         if (!task.isSuccessful()) {
                             if (efProgressDialog != null)
                                 efProgressDialog.dismiss();
@@ -287,6 +290,7 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
                                     Log.e("Firebase", "user  " + user.email);
                                     isCompanyProfileUpdated = user.isCompanyProfileUpdated;
                                     Log.e("Firebase", "isCompanyProfileUpdated " + isCompanyProfileUpdated);
+                                    updateFirebaseToken(task.getResult().getUser().getUid(),   FirebaseInstanceId.getInstance().getToken());
                                     new Handler().postDelayed(new Runnable() {
                                         @Override
                                         public void run() {
@@ -391,5 +395,14 @@ public class LoginActivity extends BaseActivity implements OnFingerPrintAuthenti
     public void onFingerPrintAuthenticationFailed() {
         Toast.makeText(this, "Fingerprint Authentication failed", Toast.LENGTH_SHORT).show();
         txtFingerPrint.setText("Use fingerprint");
+    }
+
+    private void updateFirebaseToken(String uid, String token) {
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child(Constants.USERS)
+                .child(uid)
+                .child(Constants.ARG_FIREBASE_TOKEN)
+                .setValue(token);
     }
 }

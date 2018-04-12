@@ -8,6 +8,7 @@ import android.Manifest;
 
 public interface Constants {
     public static String USERS = "users";
+    public static String CLIENT_USERS = "client_users";
     public static String COMPANY_INFO = "company_info";
     public static String COMPNAY_PROFILE_UPDATED = "isCompanyProfileUpdated";
     String[] PERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE};

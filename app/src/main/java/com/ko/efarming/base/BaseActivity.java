@@ -89,11 +89,17 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (getApp().getFireBaseAuth().getCurrentUser() != null) {
+            setOnlineStatus(true);
+        }
         registerReceiver(gpsReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
     }
     @Override
     protected void onPause() {
         super.onPause();
+        if (getApp().getFireBaseAuth().getCurrentUser() != null) {
+            setOnlineStatus(false);
+        }
         unregisterReceiver(gpsReceiver);
     }
 
@@ -136,6 +142,7 @@ public class BaseActivity extends AppCompatActivity {
                     }
                 });
     }
+
 
 
 

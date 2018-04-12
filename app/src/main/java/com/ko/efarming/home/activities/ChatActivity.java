@@ -16,6 +16,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.ko.efarming.EFApp;
 import com.ko.efarming.R;
 import com.ko.efarming.base.BaseActivity;
 import com.ko.efarming.chat.ChatContract;
@@ -23,11 +24,15 @@ import com.ko.efarming.chat.ChatPresenter;
 import com.ko.efarming.home.adapters.ChatRecyclerAdapter;
 import com.ko.efarming.model.Chat;
 import com.ko.efarming.model.ProductInfo;
+import com.ko.efarming.model.PushNotificationEvent;
 import com.ko.efarming.model.User;
 import com.ko.efarming.util.DateConversion;
 import com.ko.efarming.util.DeviceUtils;
 import com.ko.efarming.util.TextUtils;
 import com.squareup.picasso.Picasso;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
@@ -124,6 +129,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Tex
                     receiver = user.email;
                     receiverUid = user.uid;
                     receiverFirebaseToken = user.firebaseToken;
+                    mChatPresenter.getOnlineStatus(receiverUid);
                     mChatPresenter.getMessage(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                             receiverUid, productInfo);
                 }
@@ -200,11 +206,35 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Tex
     }
 
 
-//    @Subscribe
-//    public void onPushNotificationEvent(PushNotificationEvent pushNotificationEvent) {
-//        if (mChatRecyclerAdapter == null || mChatRecyclerAdapter.getItemCount() == 0) {
-//            mChatPresenter.getMessage(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-//                    pushNotificationEvent.getUid());
-//        }
-//    }
+    @Subscribe
+    public void onPushNotificationEvent(PushNotificationEvent pushNotificationEvent) {
+        if (mChatRecyclerAdapter == null || mChatRecyclerAdapter.getItemCount() == 0) {
+            mChatPresenter.getMessage(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                    pushNotificationEvent.getUid(),null);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EFApp.setChatActivityOpen(true);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EFApp.setChatActivityOpen(false);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
 }
