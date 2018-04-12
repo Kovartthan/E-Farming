@@ -24,6 +24,7 @@ import com.ko.efarming.home.adapters.ChatRecyclerAdapter;
 import com.ko.efarming.model.Chat;
 import com.ko.efarming.model.ProductInfo;
 import com.ko.efarming.model.User;
+import com.ko.efarming.util.DateConversion;
 import com.ko.efarming.util.DeviceUtils;
 import com.ko.efarming.util.TextUtils;
 import com.squareup.picasso.Picasso;
@@ -108,7 +109,6 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Tex
         if (getIntent() != null && getIntent().hasExtra("user")) {
             user = (User) getIntent().getSerializableExtra("user");
             txtChatUserName.setText(user.email);
-            txtRequestFor.setText("Online");
             if (!TextUtils.isNullOrEmpty(user.userImage))
                 Picasso.get().load(user.userImage).placeholder(R.drawable.ic_account_circle_black_48dp).into(imgProfile);
         }
@@ -193,7 +193,10 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Tex
 
     @Override
     public void onGetOnlineStatus(boolean isOnline, long timeStamp) {
-
+        if (isOnline)
+            txtRequestFor.setText("Online");
+        else
+            txtRequestFor.setText("" + DateConversion.converToTimeForRecentActivity(timeStamp));
     }
 
 

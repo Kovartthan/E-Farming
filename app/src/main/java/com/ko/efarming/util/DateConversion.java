@@ -38,7 +38,7 @@ public class DateConversion {
         long diffInDays = diff / (24 * 60 * 60 * 1000);
         long diffInWeeks = diff / (7 * 24 * 60 * 60 * 1000);
         if (diffInDays != 0 && diffInDays >= 2) {
-            lastSeen = "last seen yesterday " + getDate(timeInMillis, "yyyy-MM-dd HH:mm aa");
+            lastSeen = "last seen at " + getDate(timeInMillis, "yyyy-MM-dd HH:mm aa");
         } else if (diffInDays != 0 && diffInDays == 1) {
             lastSeen = "last seen yesterday " + getDate(timeInMillis, "HH:mm aa");
         } else {
